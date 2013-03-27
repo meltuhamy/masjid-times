@@ -14,9 +14,9 @@ SET time_zone = "+00:00";
 CREATE TABLE `mosque` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `location` varchar(50) NOT NULL,
-  `profileid` int(11) NOT NULL,
-  `dst-start` datetime NOT NULL,
-  `dst-end` datetime NOT NULL,
+  `profileid` int(11) NULL,
+  `dst-start` datetime NULL,
+  `dst-end` datetime NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
