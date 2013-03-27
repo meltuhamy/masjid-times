@@ -48,7 +48,7 @@ CREATE TABLE `prayertimes` (
   `asr` varchar(5) NOT NULL,
   `maghrib` varchar(5) NOT NULL,
   `isha` varchar(5) NOT NULL,
-  PRIMARY KEY (`mosque_id`)
+  KEY (`mosque_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
