@@ -13,7 +13,7 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `mosque` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `location` varchar(20) NOT NULL,
+  `location` varchar(50) NOT NULL,
   `profileid` int(11) NOT NULL,
   `dst-start` datetime NOT NULL,
   `dst-end` datetime NOT NULL,
