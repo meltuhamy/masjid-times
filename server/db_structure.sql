@@ -13,24 +13,17 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `mosque` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `location` varchar(50) NOT NULL,
-  `profileid` int(11) NULL,
-  `dst-start` datetime NULL,
-  `dst-end` datetime NULL,
+  `lat` double NOT NULL,
+  `long` double NOT NULL,
+  `dst-start` datetime DEFAULT NULL,
+  `dst-end` datetime DEFAULT NULL,
+  `name` varchar(50) NOT NULL,
+  `location` varchar(100) NOT NULL,
+  `contact` varchar(60) DEFAULT NULL,
+  `capacity` int(11) DEFAULT NULL,
+  `description` varchar(200) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `mosque_profile`
---
-
-CREATE TABLE `mosque_profile` (
-  `mosque_id` int(11) NOT NULL,
-  `profile_id` int(11) NOT NULL,
-  PRIMARY KEY (`mosque_id`,`profile_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
 
 -- --------------------------------------------------------
 
@@ -48,19 +41,5 @@ CREATE TABLE `prayertimes` (
   `asr` varchar(5) NOT NULL,
   `maghrib` varchar(5) NOT NULL,
   `isha` varchar(5) NOT NULL,
-  KEY (`mosque_id`)
+  KEY `mosque_id` (`mosque_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `profile`
---
-
-CREATE TABLE `profile` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `fieldname` varchar(30) NOT NULL,
-  `fieldtype` varchar(20) NOT NULL,
-  `fieldcontent` longtext NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;

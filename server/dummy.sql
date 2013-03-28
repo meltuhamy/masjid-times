@@ -9,16 +9,8 @@ SET time_zone = "+00:00";
 -- Dumping data for table `mosque`
 --
 
-INSERT INTO `mosque` (`id`, `location`, `profileid`, `dst-start`, `dst-end`) VALUES
-(1, '54.582560, -5.941778', NULL, NULL, NULL);
-
---
--- Dumping data for table `mosque_profile`
---
-
-INSERT INTO `mosque_profile` (`mosque_id`, `profile_id`) VALUES
-(1, 1),
-(1, 2);
+INSERT INTO `mosque` (`id`, `lat`, `long`, `dst-start`, `dst-end`, `name`, `location`, `contact`, `capacity`, `description`) VALUES
+(1, 54.58256, -5.941778, NULL, NULL, 'Belfast Islamic Centre', '38 Wellington Park, Belfast, BT9 6DN', '028 9066 4465', 330, '');
 
 --
 -- Dumping data for table `prayertimes`
@@ -390,11 +382,3 @@ INSERT INTO `prayertimes` (`mosque_id`, `month`, `day`, `fajr`, `shuruq`, `duhr`
 (1, 12, 29, '06:49', '08:45', '12:27', '13:52', '16:08', '17:57'),
 (1, 12, 30, '06:49', '08:45', '12:28', '13:53', '16:09', '17:58'),
 (1, 12, 31, '06:49', '08:45', '12:28', '13:54', '16:01', '17:59');
-
---
--- Dumping data for table `profile`
---
-
-INSERT INTO `profile` (`id`, `fieldname`, `fieldtype`, `fieldcontent`) VALUES
-(1, 'Name', 'text', 'Belfast Islamic Centre'),
-(2, 'Location', 'text', '38 Wellington Park,\r\nBelfast BT9 6DN, \r\nUnited Kingdom');
