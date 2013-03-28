@@ -13,3 +13,7 @@ How to set up server
 2. Import the database structure in ```db_structure.sql``` and if you want to, the dummy data ```dummy.sql```.
 3. Set up your HTTP server to use ```server``` directory for serving files (this can be done by sym-linking the folder into your htdocs folder.)
 4. Test the service using a POST client like [Postman](https://chrome.google.com/webstore/detail/postman-rest-client/fdmmgilgnpjigdojojpjoooidkmcomcm?utm_source=chrome-ntp-icon).
+
+Prayer Times API
+----------------
+An API is provided to get prayer times using a simple HTTP RESTful interface. Check the [wiki](https://github.com/meltuhamy/masjid-times/wiki/Prayer-Times-API) for details.
