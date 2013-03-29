@@ -3,11 +3,12 @@ var masjidTimes = newMasjidTimes();
 var nextPrayerCounter = function(data){
   var newTimeLeft = data/60000;
   var seconds = false;
-  if(newTimeLeft == 0){
+  if(newTimeLeft <= 0){
     seconds = true;
     newTimeLeft = data/1000;
   }
   newTimeLeft =  Math.floor(newTimeLeft) + (seconds ? ' seconds' : ' minutes') + ' until '+ masjidTimes.next;
+  document.title = newTimeLeft;
   $('.nextprayercounter').html(newTimeLeft);
 }
 
@@ -31,7 +32,7 @@ $(document).ready(function(){
       }
 
       // Check for next prayer periodically
-      masjidTimes.nextPrayerInterval(500, nextPrayerCounter);
+      masjidTimes.nextPrayerInterval(nextPrayerCounter);
     });
   });
 });
