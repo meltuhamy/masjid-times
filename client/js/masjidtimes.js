@@ -42,6 +42,22 @@ var newMasjidTimes = function(config){
     });
   }
 
+  public.requestTodayPrayerTimes = function(mosqueid, callback){
+    var date, day, month;
+    date = new Date;
+    day = date.getDate();
+    month = date.getMonth() + 1;
+
+    $.ajax({
+      url: 'http://localhost:8888/masjid/table/'+mosqueid,
+      type: 'GET',
+      data: {'month': month, 'day': day},
+      cache: true
+    }).done(function(data){
+      callback({request: {'month': month, 'day': day}, response: data});
+    });
+  }
+
   //Constructor
   return public;
 }
