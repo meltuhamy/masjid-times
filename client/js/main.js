@@ -13,26 +13,31 @@ var nextPrayerCounter = function(data){
 }
 
 $(document).ready(function(){
-  //Get the nearest mosque info and log it.
-  masjidTimes.requestNearestMosque(54,-5,null,function(data){
-    mosque = data.response;
+  //Get locations
+  navigator.geolocation.getCurrentPosition(function(locationData){
+    // We have location data :D
+    coords = locationData.coords;
+    // Get the nearest mosque info and log it.
+    masjidTimes.requestNearestMosque(coords.latitude,coords.longitude,null,function(data){
+      mosque = data.response;
 
-    //Tell masjidTimes to use this mosque from now on.
-    masjidTimes.useMosque(mosque);
+      //Tell masjidTimes to use this mosque from now on.
+      masjidTimes.useMosque(mosque);
 
-    //Update any mosque name place holders.
-    $('.mosque-name').html(mosque.name);
+      //Update any mosque name place holders.
+      $('.mosque-name').html(mosque.name);
 
-    //Populate today's times.
-    masjidTimes.requestTodayPrayerTimes(function(data){
-      times = data.response;
-      //Go through each prayer and update its html.
-      for(var i = 0; i<masjidTimes.prayers.length; i++){
-        $('.'+masjidTimes.prayers[i]+'-time').html(times[masjidTimes.prayers[i]]);
-      }
+      //Populate today's times.
+      masjidTimes.requestTodayPrayerTimes(function(data){
+        times = data.response;
+        //Go through each prayer and update its html.
+        for(var i = 0; i<masjidTimes.prayers.length; i++){
+          $('.'+masjidTimes.prayers[i]+'-time').html(times[masjidTimes.prayers[i]]);
+        }
 
-      // Check for next prayer periodically
-      masjidTimes.nextPrayerInterval(nextPrayerCounter);
+        // Check for next prayer periodically
+        masjidTimes.nextPrayerInterval(nextPrayerCounter);
+      });
     });
   });
 });
