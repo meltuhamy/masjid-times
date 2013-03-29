@@ -187,6 +187,9 @@ var newMasjidTimes = function(config){
       clearInterval(private.nextPrayerIntervalId);
     }
 
+    //Do a next prayer check now...
+    private.nextPrayerChecker();
+
     //Set the new interval
     private.nextPrayerIntervalId = setInterval(private.nextPrayerChecker, private.nextPrayerFrequency);
   }
