@@ -32,17 +32,52 @@ $app->get('/', function () use ($app) {
 
 /**
  * Gets the prayer time table for specified mosque id.
- * @var [type]
  */
 $app->get('/table/:mosqueid', function($mosqueid) use ($app){
+  $req = $app->request();
+  $sqlBinding = array('mosqueid' => $mosqueid);
+
+  //Get request filtering.
+  $month = $req->params('month');
+  $day = $req->params('day');
+  $prayer = $req->params('prayer');
+
   try {
-    $stmt = $app->db->prepare('SELECT * FROM prayertimes WHERE mosque_id = ?');
-    $stmt->execute(array($mosqueid));
+    $sql = 'SELECT * FROM prayertimes WHERE mosque_id = :mosqueid';
+    if(isset($month)) {
+      $sql .= ' AND month = :month';
+      $sqlBinding['month'] = $month;
+      if(isset($day)){
+        $sqlBinding['day'] = $day;
+        $sql .= ' AND day = :day';
+      }
+    }
+
+    //Execute the statement
+    $stmt = $app->db->prepare($sql);
+    $stmt->execute($sqlBinding);
+
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
   } catch(PDOException $ex) {
-    
+    //TODO: Error
   }
-  json($rows);
+
+  //Depending on our request, we figure out what to output.
+  if(isset($day)){
+    $row = $rows[0];
+    if(isset($prayer)){
+      //TODO: Verify prayer format.
+      // We output only the single prayer time.
+      json($row[$prayer]);
+    } else {
+      // We output the single day of prayer.
+      json($row);
+    }
+  } else {
+    // We output the whole month/year of prayer times.
+    json($rows);
+  }
   
 });
 
@@ -71,10 +106,26 @@ $app->get('/mosque/', function() use ($app){
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
   } catch(PDOException $ex){
-
+    //TODO: Error
   }
   json($rows);
 });
+
+/**
+ * Gets mosque details by id
+ */
+$app->get('/mosque/:mosqueid', function($mosqueid) use($app){
+  try{
+    $stmt = $app->db->prepare('SELECT * FROM mosque WHERE id=?');
+    $stmt->execute(array($mosqueid));
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  } catch (PDOException $ex){
+    //TODO: Error
+  }
+
+  json($row);
+});
+
 
 //Run REST app
 $app->run();
