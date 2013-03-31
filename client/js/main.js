@@ -34,7 +34,17 @@ var nearestMosqueCallback = function(mosque){
   });
 }
 
+var doButtonListeners = function(){
+  $('#settings-clearcache').click(function(){
+    //Clear the cache and reload.
+    masjidTimes.clearLocalStorage();
+    window.location.reload();
+  });
+}
+
 $(document).ready(function(){
+  // Button listeners
+  doButtonListeners();
   masjidTimes = newMasjidTimes(masjidConfig);
   masjidTimes.getNearestMosque(nearestMosqueCallback);
 
