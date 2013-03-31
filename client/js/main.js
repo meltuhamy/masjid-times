@@ -1,4 +1,5 @@
-var masjidTimes = newMasjidTimes();
+
+var masjidConfig = {url: 'http://192.168.11.14:8888/masjid/'};
 
 var nextPrayerCounter = function(data){
   var newTimeLeft = data/60000;
@@ -12,33 +13,67 @@ var nextPrayerCounter = function(data){
   $('.nextprayercounter').html(newTimeLeft);
 }
 
-$(document).ready(function(){
-  //Get locations
-  navigator.geolocation.getCurrentPosition(function(locationData){
-    // We have location data :D
-    coords = locationData.coords;
-    // Get the nearest mosque info and log it.
-    masjidTimes.requestNearestMosque(coords.latitude,coords.longitude,null,function(data){
-      mosque = data.response;
+var yearToStorage = function(data){
+  var prayerTimesString = JSON.stringify(data.response);
+  localStorage.prayertimes = prayerTimesString;
+}
 
-      //Tell masjidTimes to use this mosque from now on.
-      masjidTimes.useMosque(mosque);
+var loadStorage = function(){
+  return localStorage.prayertimes == undefined || localStorage.prayerTimes == null ? undefined : JSON.parse(localStorage.prayertimes);
+}
 
-      //Update any mosque name place holders.
-      $('.mosque-name').html(mosque.name);
+var savedMasjidTimes = loadStorage();
 
-      //Populate today's times.
-      masjidTimes.requestTodayPrayerTimes(function(data){
-        times = data.response;
-        //Go through each prayer and update its html.
-        for(var i = 0; i<masjidTimes.prayers.length; i++){
-          $('.'+masjidTimes.prayers[i]+'-time').html(times[masjidTimes.prayers[i]]);
-        }
+var getNearestMosque = function(callback){
+  // Check if we already have a location stored
+  if(localStorage.nearestMosque != undefined){
+    callback(JSON.parse(localStorage.nearestMosque));
+  } else {
+    // Find location and do request
+    navigator.geolocation.getCurrentPosition(function(locationData){
+      // We have location data :D
+      coords = locationData.coords;
 
-        // Check for next prayer periodically
-        masjidTimes.nextPrayerInterval(nextPrayerCounter);
+      // Get the nearest mosque info and log it.
+      masjidTimes.requestNearestMosque(coords.latitude,coords.longitude,null,function(data){
+        mosque = data.response;
+        localStorage.nearestMosque = JSON.stringify(mosque);
       });
     });
+  }
+}
+
+var nearestMosqueCallback = function(mosque){
+  //Tell masjidTimes to use this mosque from now on.
+  masjidTimes.useMosque(mosque);
+
+  //Update any mosque name place holders.
+  $('.mosque-name').html(mosque.name);
+
+  //Populate today's times.
+  masjidTimes.requestTodayPrayerTimes(function(data){
+    times = data.response;
+    //Go through each prayer and update its html.
+    for(var i = 0; i<masjidTimes.prayers.length; i++){
+      $('.'+masjidTimes.prayers[i]+'-time').html(times[masjidTimes.prayers[i]]);
+    }
+
+    // Check for next prayer periodically
+    masjidTimes.nextPrayerInterval(nextPrayerCounter);
   });
+}
+
+$(document).ready(function(){
+  if(savedMasjidTimes != undefined){
+    //We already have the year stored
+    masjidConfig.stored = savedMasjidTimes;
+  }
+
+  masjidTimes = newMasjidTimes(masjidConfig);
+
+  getNearestMosque(nearestMosqueCallback);
+
 });
+
+
 

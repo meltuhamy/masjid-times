@@ -96,7 +96,7 @@ $app->get('/mosque/', function() use ($app){
       return;
     }
 
-    $maxRange = 2000;
+    $maxRange = 25000;
     $defaultRange = 1000;
     $reqRange = $req->params('range');
     $range = isset($reqRange) && $reqRange < $maxRange && $reqRange > 0 ? $reqRange : $defaultRange;

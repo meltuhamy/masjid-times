@@ -130,7 +130,7 @@ var newMasjidTimes = function(config){
    */
   public.requestNearestMosques = function(lat, lng, range, callback){
     $.ajax({
-      url: 'http://localhost:8888/masjid/mosque/',
+      url: private.config.url+'mosque/',
       type: 'GET',
       data: {'lat': lat, 'long': lng, 'range':range},
       cache: true
@@ -163,7 +163,7 @@ var newMasjidTimes = function(config){
     month = date.getMonth() + 1;
 
     $.ajax({
-      url: 'http://localhost:8888/masjid/table/'+mosqueid,
+      url: private.config.url+'table/'+mosqueid,
       type: 'GET',
       data: {'month': month, 'day': day},
       cache: true
@@ -199,6 +199,18 @@ var newMasjidTimes = function(config){
 
     //Set the new interval
     private.nextPrayerIntervalId = setInterval(private.nextPrayerChecker, private.nextPrayerFrequency);
+  }
+
+  public.requestAllPrayerTimes = function(mosqueid, callback){
+    $.ajax({
+      url: private.config.url+'table/'+mosqueid,
+      type: 'GET',
+      cache: true
+    }).done(function(data){
+      //Update the year object
+      public.year = data;
+      callback({response: data});
+    });
   }
 
 
