@@ -13,35 +13,6 @@ var nextPrayerCounter = function(data){
   $('.nextprayercounter').html(newTimeLeft);
 }
 
-var yearToStorage = function(data){
-  var prayerTimesString = JSON.stringify(data.response);
-  localStorage.prayertimes = prayerTimesString;
-}
-
-var loadStorage = function(){
-  return localStorage.prayertimes == undefined || localStorage.prayerTimes == null ? undefined : JSON.parse(localStorage.prayertimes);
-}
-
-var savedMasjidTimes = loadStorage();
-
-var getNearestMosque = function(callback){
-  // Check if we already have a location stored
-  if(localStorage.nearestMosque != undefined){
-    callback(JSON.parse(localStorage.nearestMosque));
-  } else {
-    // Find location and do request
-    navigator.geolocation.getCurrentPosition(function(locationData){
-      // We have location data :D
-      coords = locationData.coords;
-
-      // Get the nearest mosque info and log it.
-      masjidTimes.requestNearestMosque(coords.latitude,coords.longitude,null,function(data){
-        mosque = data.response;
-        localStorage.nearestMosque = JSON.stringify(mosque);
-      });
-    });
-  }
-}
 
 var nearestMosqueCallback = function(mosque){
   //Tell masjidTimes to use this mosque from now on.
@@ -64,14 +35,8 @@ var nearestMosqueCallback = function(mosque){
 }
 
 $(document).ready(function(){
-  if(savedMasjidTimes != undefined){
-    //We already have the year stored
-    masjidConfig.stored = savedMasjidTimes;
-  }
-
   masjidTimes = newMasjidTimes(masjidConfig);
-
-  getNearestMosque(nearestMosqueCallback);
+  masjidTimes.getNearestMosque(nearestMosqueCallback);
 
 });
 

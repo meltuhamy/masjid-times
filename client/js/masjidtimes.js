@@ -16,7 +16,13 @@ var newMasjidTimes = function(config){
     nextPrayerCallback: {},
 
     // The frequency to check for next prayer
-    nextPrayerFrequency: {}
+    nextPrayerFrequency: {},
+
+    // Local storage ids
+    ls: {
+      prayerTimes: 'prayertimes',
+      nearestMosque: 'nearestMosque'
+    }
   };
 
   //Private methods
@@ -120,6 +126,23 @@ var newMasjidTimes = function(config){
   };
 
   //Public methods
+  
+  /**
+   * Clears all local storage stored by masjidtimes
+   */
+  public.clearLocalStorage = function(){
+    for(var k in private.ls){
+      if (private.ls.hasOwnProperty(k)) localStorage.removeItem(k);
+    }
+  }
+
+  public.storeNearestMosque = function(mosque){
+    localStorage[private.ls.nearestMosque] = JSON.stringify(mosque);
+  }
+
+  public.loadNearestMosque = function(){
+    return localStorage[private.ls.nearestMosque] == undefined ? undefined : JSON.parse(localStorage[private.ls.nearestMosque]);
+  }
 
   /**
    * Asynchronously does ajax request to get array of nearest mosques
@@ -154,6 +177,26 @@ var newMasjidTimes = function(config){
 
   public.useMosque = function(mosqueData){
     public.mosque = mosqueData;
+  }
+
+  public.getNearestMosque = function(callback){
+    // Check if we already have a location stored
+    if(public.loadNearestMosque() != undefined){
+      callback(public.loadNearestMosque());
+    } else {
+      // Find location and do request
+      navigator.geolocation.getCurrentPosition(function(locationData){
+        // We have location data :D
+        coords = locationData.coords;
+
+        // Get the nearest mosque info and log it.
+        public.requestNearestMosque(coords.latitude,coords.longitude,null,function(data){
+          mosque = data.response;
+          public.storeNearestMosque(mosque);
+          callback(mosque);
+        });
+      });
+    }
   }
 
   public.requestTodayPrayerTimesByID = function(mosqueid, callback){
@@ -212,6 +255,8 @@ var newMasjidTimes = function(config){
       callback({response: data});
     });
   }
+
+
 
 
 
