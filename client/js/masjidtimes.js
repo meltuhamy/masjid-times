@@ -159,6 +159,9 @@ var newMasjidTimes = function(config){
       cache: true
     }).done(function(data){
       callback({request: {'lat': lat, 'long': lng, 'range':range}, response: data});
+    }).error(function(data){
+      console.error('ajax error');
+      console.error(data);
     });
   }
 

@@ -7,7 +7,11 @@ require 'config.php';
  * @param  mixed $data The data to output in json form
  */
 function json($data){
-  echo json_encode($data);
+  if(isset($_GET['callback'])){
+    echo $_GET['callback']."(".json_encode($data).");";
+  } else {
+    echo json_encode($data);
+  }
 }
 
 \Slim\Slim::registerAutoloader();
