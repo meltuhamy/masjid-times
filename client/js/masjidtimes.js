@@ -226,7 +226,7 @@ var newMasjidTimes = function(config){
    * @param  {Function} callback The function to call when request done.
    */
   public.requestTodayPrayerTimes = function(callback){
-    if(public.mosque.id != undefined) public.requestTodayPrayerTimesByID(public.mosque.id, callback);
+    if(public.mosque.prayertimes_id != undefined) public.requestTodayPrayerTimesByID(public.mosque.prayertimes_id, callback);
   }
 
   public.nextPrayerInterval = function(callback){

@@ -1,5 +1,5 @@
 
-var masjidConfig = {url: 'http://192.168.11.14:8888/masjid/'};
+var masjidConfig = {url: window.location.origin+'/masjid/'};
 
 var nextPrayerCounter = function(data){
   var newTimeLeft = data/60000;

@@ -1,3 +1,6 @@
+SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
+
 --
 -- Database: `masjidtimes`
 --
@@ -6,15 +9,21 @@
 -- Dumping data for table `mosque`
 --
 
-INSERT INTO `mosque` (`id`, `lat`, `long`, `dst-start`, `dst-end`, `name`, `location`, `contact`, `capacity`, `description`) VALUES
-(1, 54.58256, -5.941778, NULL, NULL, 'Belfast Islamic Centre', '38 Wellington Park, Belfast, BT9 6DN', '028 9066 4465', 330, ''),
-(2, 51.528896, -0.164669, NULL, NULL, 'Islamic Cultural Centre (ICCUK)', '146 Park Rd, London NW8 7RG', '020 7724 3363', 5400, 'http://www.iccuk.org/');
+INSERT INTO `mosque` (`id`, `prayertimes_id`, `lat`, `long`, `dst-start`, `dst-end`, `name`, `location`, `contact`, `capacity`, `description`) VALUES
+(1, 1, 54.58256, -5.941778, NULL, NULL, 'Belfast Islamic Centre', '38 Wellington Park, Belfast, BT9 6DN', '028 9066 4465', 330, ''),
+(2, 2, 51.528896, -0.164669, NULL, NULL, 'Islamic Cultural Centre', '146 Park Rd, London NW8 7RG', '020 7724 3363', 5400, 'http://www.iccuk.org/'),
+(3, 2, 51.50543, -0.149034, NULL, NULL, 'Mayfair Islamic Centre', '19 Hertford St, London W1J 7RU', '020 7495 8283', 730, 'Arab - Qatari'),
+(4, 2, 51.5173, -0.065736, NULL, NULL, 'East London Mosque', '46-92 Whitechapel Rd, London E1 1JX', '020 7650 3000', 4500, 'Bangladeshi, Pakistani, Somali, Arab'),
+(5, 2, 51.563442, -0.10724, NULL, NULL, 'Muslim Welfare House', '233 Seven Sisters Road, Finsbury Park, London, Greater London, N4 2DA', '020 7263 3071', 1600, 'Arab'),
+(6, 2, 51.476309, -0.201616, NULL, NULL, 'Al-Muntada Al-Islami Trust', '7 Bridges Place, Parsons Green, London, Greater London, SW6 4HW', '020 7736 9060', 1100, 'Arab'),
+(7, 2, 51.521685, -0.204174, NULL, NULL, 'Muslim Cultural Heritage Centre', '244 Acklam Road, Westbourne Park, London, Greater London, W10 5YG', '020 8964 1496', 1500, 'Arab'),
+(8, 2, 51.553092, -0.004946, NULL, NULL, 'Masjid Al Tawhid', '80 High Road, Leyton, London, Greater London, E15 2BP', '020 8519 6655', 1000, 'Pakistani');
 
 --
 -- Dumping data for table `prayertimes`
 --
 
-INSERT INTO `prayertimes` (`mosque_id`, `month`, `day`, `fajr`, `shuruq`, `duhr`, `asr`, `maghrib`, `isha`) VALUES
+INSERT INTO `prayertimes` (`id`, `month`, `day`, `fajr`, `shuruq`, `duhr`, `asr`, `maghrib`, `isha`) VALUES
 (1, 1, 1, '06:49', '08:44', '12:29', '13:55', '16:11', '18:00'),
 (1, 1, 2, '06:49', '08:44', '12:29', '13:56', '16:12', '18:01'),
 (1, 1, 3, '06:49', '08:44', '12:03', '13:57', '16:14', '18:02'),

@@ -35,11 +35,11 @@ $app->get('/', function () use ($app) {
 });
 
 /**
- * Gets the prayer time table for specified mosque id.
+ * Gets the prayer time table for specified prayertimes id.
  */
-$app->get('/table/:mosqueid', function($mosqueid) use ($app){
+$app->get('/table/:prayerid', function($prayerid) use ($app){
   $req = $app->request();
-  $sqlBinding = array('mosqueid' => $mosqueid);
+  $sqlBinding = array('prayerid' => $prayerid);
 
   //Get request filtering.
   $month = $req->params('month');
@@ -47,7 +47,7 @@ $app->get('/table/:mosqueid', function($mosqueid) use ($app){
   $prayer = $req->params('prayer');
 
   try {
-    $sql = 'SELECT * FROM prayertimes WHERE mosque_id = :mosqueid';
+    $sql = 'SELECT * FROM prayertimes WHERE id = :prayerid';
     if(isset($month)) {
       $sql .= ' AND month = :month';
       $sqlBinding['month'] = $month;
