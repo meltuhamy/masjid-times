@@ -27,6 +27,9 @@ var newMasjidTimes = function(config){
 
   //Private methods
   
+  private.toJSON = function(data){
+    return (typeof data) == 'string' ? JSON.parse(data) : data;
+  }
   /**
    * Turns a time string of the form "hours:minutes" into an object
    * with properties hours and minutes
@@ -158,6 +161,7 @@ var newMasjidTimes = function(config){
       data: {'lat': lat, 'long': lng, 'range':range},
       cache: true
     }).done(function(data){
+      data = private.toJSON(data);
       callback({request: {'lat': lat, 'long': lng, 'range':range}, response: data});
     }).error(function(data){
       console.error('ajax error');
@@ -214,6 +218,7 @@ var newMasjidTimes = function(config){
       data: {'month': month, 'day': day},
       cache: true
     }).done(function(data){
+      data = private.toJSON(data);
       //Update the today object
       public.today = data;
       callback({request: {'month': month, 'day': day}, response: data});
@@ -253,6 +258,7 @@ var newMasjidTimes = function(config){
       type: 'GET',
       cache: true
     }).done(function(data){
+      data = private.toJSON(data);
       //Update the year object
       public.year = data;
       callback({response: data});
