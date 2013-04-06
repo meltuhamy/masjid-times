@@ -14,6 +14,15 @@ function json($data){
   }
 }
 
+function json_error($app, $message, $status = 400){
+  $app->response()->status($status);
+  json(array('Error'=>$message));
+}
+
+function db_json_error($app, $message='There is a problem with the database.'){
+  json_error($app, $message, 503);
+}
+
 \Slim\Slim::registerAutoloader();
 $app = new \Slim\Slim();
 
@@ -64,7 +73,8 @@ $app->get('/table/:prayerid', function($prayerid) use ($app){
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
   } catch(PDOException $ex) {
-    //TODO: Error
+    db_json_error($app);
+    return;
   }
 
   //Depending on our request, we figure out what to output.
@@ -95,8 +105,7 @@ $app->get('/mosque/', function() use ($app){
     $long = $req->params('long');
 
     if(!isset($lat, $long)){
-      $app->response()->status(400);
-      json(array('Error'=>'Lat and Long must be set'));
+      json_error($app, 'Lat and Long must be set');
       return;
     }
 
@@ -110,7 +119,8 @@ $app->get('/mosque/', function() use ($app){
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
   } catch(PDOException $ex){
-    //TODO: Error
+    db_json_error($app);
+    return;
   }
   json($rows);
 });
@@ -124,7 +134,8 @@ $app->get('/mosque/:mosqueid', function($mosqueid) use($app){
     $stmt->execute(array($mosqueid));
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
   } catch (PDOException $ex){
-    //TODO: Error
+    db_json_error($app);
+    return;
   }
 
   json($row);
