@@ -2,15 +2,25 @@
 var masjidConfig = {url: window.location.origin+'/masjid/'};
 
 var nextPrayerCounter = function(data){
-  var newTimeLeft = data/60000;
-  var seconds = false;
-  if(newTimeLeft <= 0){
-    seconds = true;
-    newTimeLeft = data/1000;
+  var timeLeftArray = remaining.getArray(Math.floor(data/1000));
+  var hours = timeLeftArray[0];
+  var minutes = timeLeftArray[1];
+  var seconds = timeLeftArray[2];
+
+
+  var outputString = '';
+  // If 1 minute left, display seconds
+  if(hours == 0 && minutes == 0){
+    outputString = seconds + " second" + (seconds == 1 ? '' : 's');
+  } else {
+    outputString = hours > 0 ? (hours + ' hour' + (hours == 1 ? '' : 's') + ', ') : '';
+    outputString += minutes +' minute' + (minutes == 1 ? '' : 's');
   }
-  newTimeLeft =  Math.floor(newTimeLeft) + (seconds ? ' seconds' : ' minutes') + ' until '+ masjidTimes.next;
-  document.title = newTimeLeft;
-  $('.nextprayercounter').html(newTimeLeft);
+
+  outputString += " until " + masjidTimes.next;
+  
+  document.title = outputString;
+  $('.nextprayercounter').html(outputString);
 }
 
 
