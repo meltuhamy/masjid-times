@@ -6,4 +6,5 @@ $CONFIG = array(
   'db_port' => 8889,
   'db_user' => 'masjidtimes',
   'db_pass' => 'masjidtimes'
+  //'DEBUG'   => false
 );

@@ -71,7 +71,7 @@ function getDebugMosque(){
 \Slim\Slim::registerAutoloader();
 $app = new \Slim\Slim();
 
-$app->debug = isset($_GET['debug']) && $_GET['debug'] == '1';
+$app->debug = (isset($CONFIG['DEBUG']) && $CONFIG['DEBUG']) || (isset($_GET['debug']) && $_GET['debug'] == '1' && !(isset($CONFIG['DEBUG']) && !$CONFIG['DEBUG']));
 $app->db = new PDO("mysql:host={$CONFIG['db_host']};dbname={$CONFIG['db_name']};port={$CONFIG['db_port']};charset=utf8", $CONFIG['db_user'], $CONFIG['db_pass']);
 $res = $app->response();
 
