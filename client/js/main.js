@@ -7,7 +7,6 @@ var nextPrayerCounter = function(data){
   var minutes = timeLeftArray[1];
   var seconds = timeLeftArray[2];
 
-
   var outputString = '';
   // If 1 minute left, display seconds
   if(hours == 0 && minutes == 0){

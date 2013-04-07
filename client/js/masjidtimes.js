@@ -85,6 +85,7 @@ var newMasjidTimes = function(config){
     next = public.next;   
     if(next === undefined || private.prayerPassed(next)){
       public.next = private.calculateNextPrayer(now);
+      window.location.reload();
     }
 
     // Update number of seconds remaining
@@ -246,7 +247,7 @@ var newMasjidTimes = function(config){
     private.nextPrayerChecker();
 
     //If less than 1.5 minutes left, update more frequently.
-    private.nextPrayerFrequency = public.millisecondsToNextPrayer <= 90000 ? 600 : 50000;
+    private.nextPrayerFrequency = public.millisecondsToNextPrayer <= 90000 ? 5000 : 50000;
 
     //Set the new interval
     private.nextPrayerIntervalId = setInterval(private.nextPrayerChecker, private.nextPrayerFrequency);
