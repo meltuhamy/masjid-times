@@ -10,7 +10,7 @@ var newMasjidTimes = function(config){
     config: config,
 
     //The next prayer interval id
-    nextPrayerIntervalId: {},
+    nextPrayerTimeoutId: {},
 
     // The function to call when time for prayer
     nextPrayerCallback: {},
@@ -56,6 +56,8 @@ var newMasjidTimes = function(config){
   private.calculateNextPrayer = function(fromDate){
     var allPrayers = public.prayers;
     var now = fromDate === undefined ? new Date() : fromDate;
+    now.setSeconds(0); // Ensures no annoying rounding stuff.
+
     var nearestPrayer = '';
     var minDiff = 86400000; // 24 hours (i.e. max diff initially)
 
@@ -78,26 +80,9 @@ var newMasjidTimes = function(config){
   }
 
   private.nextPrayerChecker = function(){
-    var allPrayers = public.prayers;
-    var now = new Date();
-
-    // Check what's the nearest (next) prayer time 
-    next = public.next;   
-    if(next === undefined || private.prayerPassed(next)){
-      public.next = private.calculateNextPrayer(now);
-      window.location.reload();
-    }
-
-    // Update number of seconds remaining
-    public.millisecondsToNextPrayer = private.stringToTodayDate(public.today[public.next]) - now;
-
-    if(public.millisecondsToNextPrayer <= 90000 && private.nextPrayerFrequency >= 60000){
-      // Reset interval so it's now faster
-      public.nextPrayerInterval(public.millisecondsToNextPrayer);
-    } else {
-      // Normal: callback
-      private.nextPrayerCallback(public.millisecondsToNextPrayer);
-    }
+    public.updateSecondsRemaining();
+    private.nextPrayerCallback(public.millisecondsToNextPrayer);
+    public.nextPrayerInterval(private.nextPrayerCallback);
   }
 
 
@@ -238,19 +223,35 @@ var newMasjidTimes = function(config){
   public.nextPrayerInterval = function(callback){
     private.nextPrayerCallback = callback;
 
-    if(!isNaN(private.nextPrayerIntervalId)){
+    if(!isNaN(private.nextPrayerTimeoutId)){
       //Interval already set. Clear it.
-      clearInterval(private.nextPrayerIntervalId);
+      clearTimeout(private.nextPrayerTimeoutId);
     }
 
     //Do a next prayer check now...
-    private.nextPrayerChecker();
+    //private.nextPrayerCallback(public.updateSecondsRemaining());
 
-    //If less than 1.5 minutes left, update more frequently.
-    private.nextPrayerFrequency = public.millisecondsToNextPrayer <= 90000 ? 5000 : 50000;
+    //Check every second
+    private.nextPrayerFrequency = 20000;
 
     //Set the new interval
-    private.nextPrayerIntervalId = setInterval(private.nextPrayerChecker, private.nextPrayerFrequency);
+    private.nextPrayerTimeoutId = setTimeout(private.nextPrayerChecker, private.nextPrayerFrequency);
+  }
+
+  public.updateSecondsRemaining = function(){
+    var allPrayers = public.prayers;
+    var now = new Date();
+    now.setSeconds(0);
+
+    // Check what's the nearest (next) prayer time 
+    next = public.next;   
+    if(next === undefined || private.prayerPassed(next)){
+      //Prayer has passed, check next prayer
+      public.next = private.calculateNextPrayer(now);
+    }
+
+    // Update number of seconds remaining
+    return public.millisecondsToNextPrayer = private.stringToTodayDate(public.today[public.next]) - now;
   }
 
   public.requestAllPrayerTimes = function(mosqueid, callback){

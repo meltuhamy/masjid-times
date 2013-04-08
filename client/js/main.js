@@ -2,15 +2,16 @@
 var masjidConfig = {url: window.location.origin+'/masjid/'};
 
 var nextPrayerCounter = function(data){
-  var timeLeftArray = remaining.getArray(Math.floor(data/1000));
+  console.log("Next prayer check: "+(data/1000));
+  
+  var timeLeftArray = remaining.getArray(data/1000);
   var hours = timeLeftArray[0];
-  var minutes = timeLeftArray[1];
-  var seconds = timeLeftArray[2];
+  var minutes = timeLeftArray[1] + Math.round(timeLeftArray[2]/60);
 
   var outputString = '';
   // If 1 minute left, display seconds
   if(hours == 0 && minutes == 0){
-    outputString = seconds + " second" + (seconds == 1 ? '' : 's');
+    outputString = "Less than a minute";
   } else {
     outputString = hours > 0 ? (hours + ' hour' + (hours == 1 ? '' : 's') + ', ') : '';
     outputString += minutes +' minute' + (minutes == 1 ? '' : 's');
@@ -39,6 +40,8 @@ var nearestMosqueCallback = function(mosque){
     }
 
     // Check for next prayer periodically
+    // Update next prayer counter now then check periodically
+    nextPrayerCounter(masjidTimes.updateSecondsRemaining());
     masjidTimes.nextPrayerInterval(nextPrayerCounter);
   });
 }
