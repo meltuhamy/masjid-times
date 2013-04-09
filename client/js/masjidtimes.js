@@ -204,17 +204,19 @@ var newMasjidTimes = function(config){
     }
   }
 
-  public.requestTodayPrayerTimesByID = function(mosqueid, callback, inDate){
-    var date, day, month;
+  public.requestTodayPrayerTimesByID = function(mosqueid, callback, inDate, sync){
+    var date, day, month, async;
     date = inDate != undefined ? inDate : new Date;
     day = date.getDate();
     month = date.getMonth() + 1;
+    async = sync != undefined ? !sync : true;
 
     $.ajax({
       url: private.config.url+'table/'+mosqueid,
       type: 'GET',
       data: private.prepareData({'month': month, 'day': day}),
-      cache: true
+      cache: true,
+      async: async
     }).done(function(data){
       data = private.toJSON(data);
       //Update the today object
@@ -228,9 +230,9 @@ var newMasjidTimes = function(config){
    * public.useMosque() should have been envoked before calling this.
    * @param  {Function} callback The function to call when request done.
    */
-  public.requestTodayPrayerTimes = function(callback, inDate){
+  public.requestTodayPrayerTimes = function(callback, inDate, sync){
     if(public.mosque.prayertimes_id != undefined)
-      public.requestTodayPrayerTimesByID(public.mosque.prayertimes_id, callback, inDate);
+      public.requestTodayPrayerTimesByID(public.mosque.prayertimes_id, callback, inDate, sync);
   }
 
   public.nextPrayerInterval = function(callback){
@@ -280,7 +282,7 @@ var newMasjidTimes = function(config){
     });
   }
 
-  public.useDate = function(date, callback){
+  public.useDate = function(date, callback, sync){
     var dateToUse = new Date();
     // Sets todays prayer times to the date givens prayer times
     if(date == 'tomorrow'){
@@ -293,7 +295,7 @@ var newMasjidTimes = function(config){
     public.requestTodayPrayerTimes(function(data){
       public.today = data.response;
       callback(data);
-    }, dateToUse);
+    }, dateToUse, sync);
   }
 
 
