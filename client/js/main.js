@@ -1,12 +1,13 @@
 
 var masjidConfig = {url: window.location.origin+'/masjid/'};
-
+var usingTomorrow = false;
 var nextPrayerCounter = function(data){
   console.log("Next prayer check: "+(data/1000));
 
   if(masjidTimes.prayerPassed('isha')){
     // Isha has passed, display tomorrow's prayer times
     $('.todaytomorrow').html('Tomorrow');
+    usingTomorrow = true;
     masjidTimes.useDate('tomorrow', function(data){
       //If tomorrow's isha has passed, refresh page
       if(masjidTimes.prayerPassed('isha')){
@@ -16,6 +17,19 @@ var nextPrayerCounter = function(data){
     });
     
   }
+
+  //If today >= tomorrow, reload
+  if(usingTomorrow){
+    var today = new Date();
+    today.setHours(0);
+    today.setMinutes(0);
+    today.setSeconds(0);
+    var tomorrow = new Date(today.getYear(), masjidTimes.today.month, masjidTimes.today.day, 0, 0, 0, 0);
+    if(today >= tomorrow){
+      window.location.reload();
+    }
+  }
+
   
   var timeLeftArray = remaining.getArray(data/1000);
   var hours = timeLeftArray[0];
