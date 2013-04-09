@@ -3,6 +3,19 @@ var masjidConfig = {url: window.location.origin+'/masjid/'};
 
 var nextPrayerCounter = function(data){
   console.log("Next prayer check: "+(data/1000));
+
+  if(masjidTimes.prayerPassed('isha')){
+    // Isha has passed, display tomorrow's prayer times
+    $('.todaytomorrow').html('Tomorrow');
+    masjidTimes.useDate('tomorrow', function(data){
+      //If tomorrow's isha has passed, refresh page
+      if(masjidTimes.prayerPassed('isha')){
+        window.location.reload();
+      }
+      updatePrayerTimes(data.response);
+    });
+    
+  }
   
   var timeLeftArray = remaining.getArray(data/1000);
   var hours = timeLeftArray[0];
@@ -23,6 +36,17 @@ var nextPrayerCounter = function(data){
   $('.nextprayercounter').html(outputString);
 }
 
+var updatePrayerTimes = function(times){
+  //Go through each prayer and update its html.
+  for(var i = 0; i<masjidTimes.prayers.length; i++){
+    $('.'+masjidTimes.prayers[i]+'-time').html(times[masjidTimes.prayers[i]]);
+  }
+
+  // Check for next prayer periodically
+  // Update next prayer counter now then check periodically
+  nextPrayerCounter(masjidTimes.updateSecondsRemaining());
+  masjidTimes.nextPrayerInterval(nextPrayerCounter);
+}
 
 var nearestMosqueCallback = function(mosque){
   //Tell masjidTimes to use this mosque from now on.
@@ -33,16 +57,7 @@ var nearestMosqueCallback = function(mosque){
 
   //Populate today's times.
   masjidTimes.requestTodayPrayerTimes(function(data){
-    times = data.response;
-    //Go through each prayer and update its html.
-    for(var i = 0; i<masjidTimes.prayers.length; i++){
-      $('.'+masjidTimes.prayers[i]+'-time').html(times[masjidTimes.prayers[i]]);
-    }
-
-    // Check for next prayer periodically
-    // Update next prayer counter now then check periodically
-    nextPrayerCounter(masjidTimes.updateSecondsRemaining());
-    masjidTimes.nextPrayerInterval(nextPrayerCounter);
+    updatePrayerTimes(data.response);
   });
 }
 

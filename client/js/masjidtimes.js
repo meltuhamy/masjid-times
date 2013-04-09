@@ -58,6 +58,11 @@ var newMasjidTimes = function(config){
     var now = fromDate === undefined ? new Date() : fromDate;
     now.setSeconds(0); // Ensures no annoying rounding stuff.
 
+    // Tomorrow's fajr if isha is past
+    if(public.prayerPassed('isha')){
+      return 'fajr';
+    }
+
     var nearestPrayer = '';
     var minDiff = 86400000; // 24 hours (i.e. max diff initially)
 
@@ -73,10 +78,6 @@ var newMasjidTimes = function(config){
       }
     }
     return nearestPrayer;
-  }
-
-  private.prayerPassed = function(prayer){
-    return new Date() >= private.stringToTodayDate(public.today[prayer]);
   }
 
   private.nextPrayerChecker = function(){
@@ -114,8 +115,14 @@ var newMasjidTimes = function(config){
     millisecondsToNextPrayer: {}
   };
 
+
+
   //Public methods
   
+  public.prayerPassed = function(prayer){
+    return new Date() >= private.stringToTodayDate(public.today[prayer]);
+  }
+
   /**
    * Clears all local storage stored by masjidtimes
    */
@@ -192,9 +199,9 @@ var newMasjidTimes = function(config){
     }
   }
 
-  public.requestTodayPrayerTimesByID = function(mosqueid, callback){
+  public.requestTodayPrayerTimesByID = function(mosqueid, callback, inDate){
     var date, day, month;
-    date = new Date;
+    date = inDate != undefined ? inDate : new Date;
     day = date.getDate();
     month = date.getMonth() + 1;
 
@@ -216,8 +223,9 @@ var newMasjidTimes = function(config){
    * public.useMosque() should have been envoked before calling this.
    * @param  {Function} callback The function to call when request done.
    */
-  public.requestTodayPrayerTimes = function(callback){
-    if(public.mosque.prayertimes_id != undefined) public.requestTodayPrayerTimesByID(public.mosque.prayertimes_id, callback);
+  public.requestTodayPrayerTimes = function(callback, inDate){
+    if(public.mosque.prayertimes_id != undefined)
+      public.requestTodayPrayerTimesByID(public.mosque.prayertimes_id, callback, inDate);
   }
 
   public.nextPrayerInterval = function(callback){
@@ -245,7 +253,7 @@ var newMasjidTimes = function(config){
 
     // Check what's the nearest (next) prayer time 
     next = public.next;   
-    if(next === undefined || private.prayerPassed(next)){
+    if(next === undefined || public.prayerPassed(next)){
       //Prayer has passed, check next prayer
       public.next = private.calculateNextPrayer(now);
     }
@@ -265,6 +273,22 @@ var newMasjidTimes = function(config){
       public.year = data;
       callback({response: data});
     });
+  }
+
+  public.useDate = function(date, callback){
+    var dateToUse = new Date();
+    // Sets todays prayer times to the date givens prayer times
+    if(date == 'tomorrow'){
+      dateToUse.setHours(0);
+      dateToUse.setMinutes(0);
+      dateToUse = new Date(dateToUse.getTime() + 24 * 60 * 60 * 1000);
+    }
+
+    //Request prayer time using the date
+    public.requestTodayPrayerTimes(function(data){
+      public.today = data.response;
+      callback(data);
+    }, dateToUse);
   }
 
 
