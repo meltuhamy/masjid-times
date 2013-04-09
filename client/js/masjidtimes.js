@@ -30,6 +30,11 @@ var newMasjidTimes = function(config){
   private.toJSON = function(data){
     return (typeof data) == 'string' ? JSON.parse(data) : data;
   }
+
+  private.prepareData = function(data){
+    data.debug = private.config.debug? '1' : undefined;
+    return data;
+  }
   /**
    * Turns a time string of the form "hours:minutes" into an object
    * with properties hours and minutes
@@ -151,7 +156,7 @@ var newMasjidTimes = function(config){
     $.ajax({
       url: private.config.url+'mosque/',
       type: 'GET',
-      data: {'lat': lat, 'long': lng, 'range':range},
+      data: private.prepareData({'lat': lat, 'long': lng, 'range':range}),
       cache: true
     }).done(function(data){
       data = private.toJSON(data);
@@ -208,7 +213,7 @@ var newMasjidTimes = function(config){
     $.ajax({
       url: private.config.url+'table/'+mosqueid,
       type: 'GET',
-      data: {'month': month, 'day': day},
+      data: private.prepareData({'month': month, 'day': day}),
       cache: true
     }).done(function(data){
       data = private.toJSON(data);

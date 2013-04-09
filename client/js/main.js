@@ -1,6 +1,7 @@
 
-var masjidConfig = {url: window.location.origin+'/masjid/'};
+var masjidConfig = {url: window.location.origin+'/masjid/', debug: false};
 var usingTomorrow = false;
+
 var nextPrayerCounter = function(data){
   console.log("Next prayer check: "+(data/1000));
 
