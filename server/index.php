@@ -34,6 +34,21 @@ function db_json_error($app, $message='There is a problem with the database.'){
   json_error($app, $message, 503);
 }
 
+function getDebugDay($month, $day, $offset){
+  return array(
+    'id' => -1,
+    'month' => $month,
+    'day' => $day,
+    'fajr' => date("H:i", time() + $offset),
+    'shuruq' => date("H:i", time() + $offset +60),
+    'duhr' => date("H:i", time() + $offset + 60*2),
+    'asr' => date("H:i", time() + $offset + 60*3),
+    'asr2' => date("H:i", time() + $offset + 60*4),
+    'maghrib' => date("H:i", time() + $offset + 60*5),
+    'isha' => date("H:i", time() + $offset + 60*6)
+  );
+}
+
 
 /**
  * Regardless of the prayer/mosque, gets the same data
@@ -49,24 +64,34 @@ function db_json_error($app, $message='There is a problem with the database.'){
  * @return mixed           The array/string to output
  */
 function getDebugPrayerTimes($month, $day, $prayer){
-  $offset = isset($_GET['offset']) ? intval($_GET['offset']) : 180;
-
-  if(!isset($month, $day, $prayer)){
-    // TODO: Get a whole year of dummy stuff
-  } else if (isset($month) && !isset($day)) {
-    // TODO: Get a whole month of dummy stuff
-  } else if(isset($month, $day) && !isset($prayer)){
-    // TODO: Get a day of dummy stuff
-  } else if(isset($month, $day, $prayer)){
-    // TODO: Get the next prayer
+  $DST = 60*60;
+  $offset = (isset($_GET['offset']) ? intval($_GET['offset']) : 180) - $DST;
+  $setMonth = isset($month);
+  $setDay = isset($day);
+  $setPrayer = isset($prayer);
+  if(!($setMonth || $setDay || $setPrayer)){
+    echo "here: $month:$day:$prayer";
+    $yearTimes = array();
+    for($month=1; $month<=12; $month++){
+      for($day=1; $day<=31; $day++){
+        $yearTimes[]= getDebugDay($month, $day, $offset);
+      }
+    }
+    return $yearTimes;
+  } else if ($setMonth && !$setDay) {
+    $monthTimes = array();
+    for($day=1; $day<=31; $day++){
+      $monthTimes []= getDebugDay($month, $day, $offset);
+    }
+    return $monthTimes;
+  } else if($setDay && $setMonth && !$setPrayer){
+    return getDebugDay($month, $day, $offset);
+  } else if($setMonth && $setDay && $setPrayer){
     return date("H:i", time() + $offset);
   }
 
 }
 
-function getDebugMosque(){
-
-}
 
 \Slim\Slim::registerAutoloader();
 $app = new \Slim\Slim();
