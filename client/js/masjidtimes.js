@@ -240,40 +240,6 @@ var newMasjidTimes = function(config){
       public.requestTodayPrayerTimesByID(public.mosque.prayertimes_id, callback, inDate, sync);
   }
 
-  public.nextPrayerInterval = function(callback){
-    private.nextPrayerCallback = callback;
-
-    if(!isNaN(private.nextPrayerTimeoutId)){
-      //Interval already set. Clear it.
-      clearTimeout(private.nextPrayerTimeoutId);
-    }
-
-    //Do a next prayer check now...
-    //private.nextPrayerCallback(public.updateSecondsRemaining());
-
-    //Check every second
-    private.nextPrayerFrequency = 20000;
-
-    //Set the new interval
-    private.nextPrayerTimeoutId = setTimeout(private.nextPrayerChecker, private.nextPrayerFrequency);
-  }
-
-  public.updateSecondsRemaining = function(){
-    var allPrayers = public.prayers;
-    var now = new Date();
-    now.setSeconds(0);
-
-    // Check what's the nearest (next) prayer time 
-    next = public.next;   
-    if(next === undefined || public.prayerPassed(next)){
-      //Prayer has passed, check next prayer
-      public.next = private.calculateNextPrayer(now);
-    }
-
-    // Update number of seconds remaining
-    return public.millisecondsToNextPrayer = private.stringToTodayDate(public.today[public.next]) - now;
-  }
-
   public.requestAllPrayerTimes = function(mosqueid, callback){
     $.ajax({
       url: private.config.url+'table/'+mosqueid,
