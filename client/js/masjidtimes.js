@@ -4,19 +4,29 @@
  * @return {Object}        The config (masjidTimes params)
  */
 var newMasjidTimes = function(config){
+  //Check jQuery and jStorage requirements
+  if(!(jQuery && $.jStorage)){
+    throw "jQuery and jStorage are required.";
+    return null;
+  }
+
   // Private properties
   private = {
     // Store a configuration passed in
     config: config,
 
-    //The next prayer interval id
-    nextPrayerTimeoutId: {},
-
-    // The function to call when time for prayer
-    nextPrayerCallback: {},
-
-    // The frequency to check for next prayer
-    nextPrayerFrequency: {},
+    //Event listeners.
+    events: {
+      ready: $.Callbacks(),  // Fired when succesfully fetched prayer data 
+      prayer: $.Callbacks(), // Fired when any prayer has just passed
+      fajr: $.Callbacks(),
+      shuruq: $.Callbacks(),
+      duhr: $.Callbacks(),
+      asr: $.Callbacks(),
+      asr2: $.Callbacks(),
+      maghrib: $.Callbacks(),
+      isha: $.Callbacks()
+    },
 
     // Local storage ids
     ls: {
@@ -85,11 +95,6 @@ var newMasjidTimes = function(config){
     return nearestPrayer;
   }
 
-  private.nextPrayerChecker = function(){
-    public.updateSecondsRemaining();
-    private.nextPrayerCallback(public.millisecondsToNextPrayer);
-    public.nextPrayerInterval(private.nextPrayerCallback);
-  }
 
 
   // Public properties
