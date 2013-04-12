@@ -70,7 +70,6 @@ function getDebugPrayerTimes($month, $day, $prayer){
   $setDay = isset($day);
   $setPrayer = isset($prayer);
   if(!($setMonth || $setDay || $setPrayer)){
-    echo "here: $month:$day:$prayer";
     $yearTimes = array();
     for($month=1; $month<=12; $month++){
       for($day=1; $day<=31; $day++){
