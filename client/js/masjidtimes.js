@@ -179,6 +179,24 @@ var newMasjidTimes = function(config, my){
 
 
   //Public methods
+  
+  /**
+   * Adds a callback to an event
+   * @param  {string}   event    The event name
+   * @param  {Function} callback The callback to add
+   * @return {Object}            The MasjidTimes object.
+   */
+  var on = function(event, callback){
+    //Get the callbacks object
+    var callback = events[event];
+    if(callback){
+      // Add callback to the queue
+      if(typeof callback == 'function'){
+        callback.add(callback);
+      }
+    }
+    return this;
+  }
   /**
    * Had the prayer passed yet?
    * @param  {string} prayer The prayer in question e.g. 'fajr'
