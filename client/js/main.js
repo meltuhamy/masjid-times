@@ -42,6 +42,16 @@ $(document).ready(function(){
   masjidTimes = newMasjidTimes(masjidConfig);
   masjidTimes.getNearestMosque(nearestMosqueCallback);
 
+  // Get the nearest mosques
+  masjidTimes.on('mosques', function(nearestMosques)){
+    // Let the user pick a mosque
+    
+  });
+
+  masjidTimes.init();
+
+  // Let user choose a mosque
+  // Ready should get fired sometime
 });
 
 
