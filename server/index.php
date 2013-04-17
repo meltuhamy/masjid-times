@@ -171,7 +171,7 @@ $app->get('/table/:prayerid', function($prayerid) use ($app){
 });
 
 /**
- * Gets nearby mosques specified by url paramaters lat, long and range.
+ * Gets nearby mosques specified by url parameters lat, long and range.
  */
 $app->get('/mosque/', function() use ($app){
   try{

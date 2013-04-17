@@ -43,7 +43,7 @@ $(document).ready(function(){
   masjidTimes.getNearestMosque(nearestMosqueCallback);
 
   // Get the nearest mosques
-  masjidTimes.on('mosques', function(nearestMosques)){
+  masjidTimes.on('mosques', function(nearestMosques){
     // Let the user pick a mosque
     
   });
