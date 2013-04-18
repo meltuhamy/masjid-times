@@ -1,21 +1,71 @@
 /**
  * Creates a new masjidTimes Object
  * @param  {Object} config The configuration object
- * @param  {Object} my     Used for inheritence
+ * @param  {Object} my     Used for inheritance
  * @return {Object}        The masjid times object
  */
 var newMasjidTimes = function (config, my) {
   //Check jQuery and jStorage requirements
   if (!(jQuery && $.jStorage)) {
     throw "jQuery and jStorage are required.";
-    return null;
   }
 
+
+                                      /*--------------------*
+                                            Properties
+                                      /*--------------------*/
   var my = my || {};
 
   var ref = this;
 
-  //Private properties
+  /**
+   * Everything everyone outside this function will see.
+   * @type {Object}
+   */
+  var that;
+
+
+  /**
+   * A list of all prayers
+   * @type {Array}
+   */
+  var prayers = ['fajr', 'shuruq', 'duhr', 'asr', 'maghrib', 'isha'];
+
+  /**
+   * A namespace which has all the prayer names.
+   * Can be used as an enum
+   * @type {Object}
+   */
+  var PRAYER = {
+    fajr: 0,
+    shuruq: 1,
+    duhr: 2,
+    asr: 3,
+    maghrib: 4,
+    isha: 5
+  };
+
+  /**
+   * This object is basically a namespace for all the localStorage objects
+   * used by MasjidTimes.
+   * @type {Object}
+   * @property {string} prayerTimes    A year of prayer times
+   * @property {string} mosque         The mosque we are using
+   */
+  var l = {
+    prayerTimes: 'prayerTimes',
+    nearestMosque: 'nearestMosque'
+  };
+
+  /**
+   * The mosque we are using
+   * @type {Object}
+   * @property {Object} mosque The mosque we are using
+   * @property {Object} times  The prayer times we are using
+   */
+  var using = {};
+
+
 
   /**
    * These define the masjid times events.
@@ -26,19 +76,27 @@ var newMasjidTimes = function (config, my) {
    * @type {Object}
    */
   var events = {
-    ready: $.Callbacks(),  // Fired when succesfully fetched prayer data 
-    prayer: $.Callbacks(), // Fired when any prayer has just passed
-    fajr: $.Callbacks(),
-    shuruq: $.Callbacks(),
-    duhr: $.Callbacks(),
-    asr: $.Callbacks(),
-    asr2: $.Callbacks(),
-    maghrib: $.Callbacks(),
-    isha: $.Callbacks(),
-    mosques: $.Callbacks()
+    ready: $.Callbacks(),   // Got prayer data and mosque data
+    prayer: $.Callbacks(),  // A prayer has passed
+    fajr: $.Callbacks(),    // Fajr has passed
+    shuruq: $.Callbacks(),  // Shuruq has passed
+    duhr: $.Callbacks(),    // Duhr has passed
+    asr: $.Callbacks(),     // Asr has passed
+    asr2: $.Callbacks(),    // Asr (hanafi) has passed
+    maghrib: $.Callbacks(), // Maghrib has passed
+    isha: $.Callbacks(),    // Isha has passed
+    mosques: $.Callbacks()  // Got nearest mosques
   };
 
 
+
+                                                /*--------------------*
+                                                       Methods
+                                                /*--------------------*/
+  /**
+   * Provides asynchronous server request functionalities specific to the prayertimes api.
+   * @type {Object}
+   */
   var ajax = {};
 
   /**
@@ -64,7 +122,7 @@ var newMasjidTimes = function (config, my) {
 
   /**
    * Requests array of nearest mosques
-   * @param {{lat:Number, lng:Number, range:Number}} options The options of the function.
+   * @param {{lat:Number, lng:Number, [range]:Number}} options The options of the function.
    * @param {Function} callback Function called once request completed
    */
   ajax.nearestMosques = function (options, callback) {
@@ -91,18 +149,15 @@ var newMasjidTimes = function (config, my) {
   };
 
 
-
   /**
-   * This object is basically a namespace for all the localstorage objects
-   * used by MasjidTimes.
-   * @type {Object}
+   * Clears all local storage stored by masjidTimes
    */
-  var l = {
-    prayerTimes: 'prayertimes',
-    nearestMosque: 'nearestMosque'
+  var clearLocalStorage = function () {
+    for (var k in l) {
+      if (l.hasOwnProperty(k)) $.deleteKey(k);
+    }
   };
 
-  //Private methods
 
   /**
    * Takes in some string|json and turns it into json if it isn't already.
@@ -129,7 +184,7 @@ var newMasjidTimes = function (config, my) {
    * Turns a time string of the form "hours:minutes" into an object
    * with properties hours and minutes
    * @param  {String} timeString The time string e.g. 04:00
-   * @return {Object}            Object literal with properties hours, minutes
+   * @return {{hours:Number, minutes:Number}}    Object literal with properties hours, minutes
    */
   var stringToHoursMinutes = function (timeString) {
     var split = timeString.split(":");
@@ -139,7 +194,7 @@ var newMasjidTimes = function (config, my) {
   /**
    * Turns a time string of the form "hours:minutes" into a date object
    * @param  {String} timeString The string to convert
-   * @return {Date}              Todays date at that time.
+   * @return {Date}              Today's date at that time.
    */
   var stringToTodayDate = function (timeString) {
     var split, now;
@@ -149,12 +204,20 @@ var newMasjidTimes = function (config, my) {
   };
 
   /**
+   * Has the given prayer passed yet?
+   * @param  {string} prayer The prayer in question e.g. 'fajr'
+   * @return {boolean}       True if the prayer has passed the current time (e.g. true if fajr was in the past)
+   */
+  var prayerPassed = function (prayer) {
+    return new Date() >= stringToTodayDate(today[prayer]);
+  };
+
+  /**
    * Uses today's time to calculate what the next prayer will be.
    * @param  {Date} fromDate The date we want to calculate the nearest prayer from.
    * @return {string}        The nearest (next prayer) after the date given (e.g. 'fajr')
    */
   var calculateNextPrayer = function (fromDate) {
-    var allPrayers = prayers;
     var now = fromDate === undefined ? new Date() : fromDate;
     now.setSeconds(0); // Ensures no annoying rounding stuff.
 
@@ -166,8 +229,8 @@ var newMasjidTimes = function (config, my) {
     var nearestPrayer = '';
     var minDiff = 86400000; // 24 hours (i.e. max diff initially)
 
-    for (var i = 0; i < allPrayers.length; i++) {
-      var prayer = allPrayers[i]; // e.g. "fajr" is first
+    for (var i = 0; i < prayers.length; i++) {
+      var prayer = prayers[i]; // e.g. "fajr" is first
       var prayerDate = stringToTodayDate(today[prayer]);
       var diff = prayerDate - now;
 
@@ -181,76 +244,27 @@ var newMasjidTimes = function (config, my) {
   };
 
 
-  // Public properties
-
-  /**
-   * A list of all prayers
-   * @type {Array}
-   */
-  var prayers = ['fajr', 'shuruq', 'duhr', 'asr', 'maghrib', 'isha'];
-
-  /**
-   * A namespace which has all the prayer names.
-   * Can be used as an enum
-   * @type {Object}
-   */
-  var PRAYER = {
-    fajr: 0,
-    shuruq: 1,
-    duhr: 2,
-    asr: 3,
-    maghrib: 4,
-    isha: 5
-  };
-
-  /**
-   * Holds the mosque information that we're using.
-   * Starts undefined then gets populated when ready.
-   * @type {Object}
-   */
-  var mosque = undefined;
-
-  /**
-   * The today object shows today's prayer times.
-   * Starts undefined then gets populated when ready.
-   * @type {Object}
-   */
-  var today = undefined;
-
-  /**
-   * The next prayer.
-   * Starts undefined then gets populated when ready.
-   * @type {Object}
-   */
-  var next = undefined;
-
-  /**
-   * Everything everyone outside this function will see.
-   * @type {Object}
-   */
-  var that = {prayers: prayers, PRAYER: PRAYER, mosque: mosque, today: today, next: next};
-
-
-  //Public methods
+                                              /*--------------------*
+                                                 App logic / public
+                                              /*--------------------*/
 
   /**
    * Adds a callback to an event
-   * @param  {string}   event    The event name
-   * @param  {Function} callback The callback to add
-   * @return {Object}            The MasjidTimes object.
+   * @param  {string}   event       The event name
+   * @param  {Function} newCallback The callback to add
+   * @return {Object}               The MasjidTimes object.
    */
-  var on = function (event, callback) {
+  var on = function (event, newCallback) {
     //Get the callbacks object
     var callback = events[event];
     if (callback) {
       // Add callback to the queue
       if (typeof callback == 'function') {
-        callback.add(callback);
+        callback.add(newCallback);
       }
     }
     return that;
-  }
-  that.on = on;
+  };
 
 
   var fire = function (event, args) {
@@ -259,212 +273,53 @@ var newMasjidTimes = function (config, my) {
       callback.fire(args);
     }
     return that;
-  }
-  that.fire = fire;
+  };
+
+
+
 
   /**
-   * Had the prayer passed yet?
-   * @param  {string} prayer The prayer in question e.g. 'fajr'
-   * @return {boolean}       True if the prayer has passed the current time (e.g. true if fajr was in the past)
+   * Tells masjidTimes to use the mosque provided
+   * @param {Object} mosque  A mosque object
    */
-  var prayerPassed = function (prayer) {
-    return new Date() >= stringToTodayDate(today[prayer]);
-  }
+  var useMosque = function(mosque){
+    using.mosque = mosque;
+  };
 
-  that.prayerPassed = prayerPassed;
 
   /**
-   * Clears all local storage stored by masjidtimes
+   * Loads stuff from local storage. If forced, then does a new request.
+   * @param {boolean} forced If true, empties local storage and requests new thing from server.
+   * @returns {Object}
    */
-  var clearLocalStorage = function () {
-    for (var k in l) {
-      if (l.hasOwnProperty(k)) localStorage.removeItem(k);
-    }
-  }
-
-  that.clearLocalStorage = clearLocalStorage;
-
-  /**
-   * Store the nearest mosque in local storage.
-   * @param  {Object} mosque The nearest mosque / mosque we want to store
-   */
-  var storeNearestMosque = function (mosque) {
-    localStorage[l.nearestMosque] = JSON.stringify(mosque);
-  }
-  that.storeNearestMosque = storeNearestMosque;
-
-  /**
-   * Loads and returns the nearest mosque from local storage
-   * @return {Object} The mosque that was stored.
-   */
-  var loadNearestMosque = function () {
-    return localStorage[l.nearestMosque] == undefined ? undefined : JSON.parse(localStorage[l.nearestMosque]);
-  }
-  that.loadNearestMosque = loadNearestMosque;
-
-  /**
-   * Asynchronously does ajax request to get array of nearest mosques
-   * @param  {Number}    lat      The latitude to search from
-   * @param  {Number}    lng      The longitude to search from
-   * @param  {[Number]}  range    (Optional) The range to search for
-   * @param  {Function}  callback Callback function for when the request is done.
-   */
-  var requestNearestMosques = function (lat, lng, range, callback) {
-    $.ajax({
-      url: config.url + 'mosque/',
-      type: 'GET',
-      data: prepareData({'lat': lat, 'long': lng, 'range': range}),
-      cache: true
-    }).done(function (data) {
-          data = toJSON(data);
-          callback({request: {'lat': lat, 'long': lng, 'range': range}, response: data});
-        }).error(function (data) {
-          console.error('ajax error');
-          console.error(data);
-        });
-  }
-  that.requestNearestMosques = requestNearestMosques;
-
-  /**
-   * Asynchronously does ajax request to get the nearest mosque.
-   * @param  {Number}    lat      The latitude to search from
-   * @param  {Number}    lng      The longitude to search from
-   * @param  {[Number]}  range    (Optional) The range to search for
-   * @param  {Function}  callback Callback function for when the request is done.
-   */
-  var requestNearestMosque = function (lat, lng, range, callback) {
-    requestNearestMosques(lat, lng, range, function (data) {
-      callback({request: data.request, response: data.response[0]});
-    });
-  }
-  that.requestNearestMosque = requestNearestMosque;
-
-  /**
-   * Lets prayer times use that mosque from now on.
-   * @param  {Object} mosqueData The mosque to use
-   */
-  var useMosque = function (mosqueData) {
-    mosque = mosqueData;
-  }
-  that.useMosque = useMosque;
-
-  /**
-   * Loads from storage the mosque we want to use.
-   * Otherwise, requests the nearest mosque from server.
-   * @param  {Function} callback What to do once we have the mosque
-   */
-  var getNearestMosque = function (callback) {
-    // Check if we already have a location stored
-    if (loadNearestMosque() != undefined) {
-      callback(loadNearestMosque());
-    } else {
-      // Find location and do request
-      navigator.geolocation.getCurrentPosition(function (locationData) {
-        // We have location data :D
-        coords = locationData.coords;
-
-        // Get the nearest mosque info and log it.
-        requestNearestMosque(coords.latitude, coords.longitude, null, function (data) {
-          mosque = data.response;
-          storeNearestMosque(mosque);
-          callback(mosque);
-        });
-      });
-    }
-  }
-
-  that.getNearestMosque = getNearestMosque;
-
-  /**
-   * Gets the prayer times from a prayer timetable id
-   * @param  {number}   mosqueid The prayertimes id
-   * @param  {Function} callback What to do once we have the data
-   * @param  {Date}     inDate   The date for which to get prayer times
-   * @param  {boolean}  sync     Whether or not this is an asynch call
-   */
-  var requestTodayPrayerTimesByID = function (mosqueid, callback, inDate, sync) {
-    var date, day, month, async;
-    date = inDate != undefined ? inDate : new Date;
-    day = date.getDate();
-    month = date.getMonth() + 1;
-    async = sync != undefined ? !sync : true;
-
-    $.ajax({
-      url: config.url + 'table/' + mosqueid,
-      type: 'GET',
-      data: prepareData({'month': month, 'day': day}),
-      cache: true,
-      async: async
-    }).done(function (data) {
-          data = toJSON(data);
-          //Update the today object
-          today = data;
-          callback({request: {'month': month, 'day': day}, response: data});
-        });
-  }
-  that.requestTodayPrayerTimesByID = requestTodayPrayerTimesByID;
-
-  /**
-   * Uses mosque data to get the mosque's prayer times.
-   * public.useMosque() should have been envoked before calling this.
-   * @param  {Function} callback The function to call when request done.
-   * @param sync
-   * @param inDate
-   */
-  var requestTodayPrayerTimes = function (callback, inDate, sync) {
-    if (mosque.prayertimes_id != undefined)
-      requestTodayPrayerTimesByID(mosque.prayertimes_id, callback, inDate, sync);
-  }
-  that.requestTodayPrayerTimes = requestTodayPrayerTimes;
-
-  /**
-   * Given a prayer times id, gets a whole year of prayer times
-   * @param  {number}   mosqueid Prayer times id
-   * @param  {Function} callback The function to call once we got the prayer times
-   */
-  var requestAllPrayerTimes = function (mosqueid, callback) {
-    $.ajax({
-      url: config.url + 'table/' + mosqueid,
-      type: 'GET',
-      cache: true
-    }).done(function (data) {
-          data = toJSON(data);
-          //Update the year object
-          year = data;
-          callback({response: data});
-        });
-  }
-  that.requestAllPrayerTimes = requestAllPrayerTimes;
-
-  /**
-   * Tells prayer times to use specific set of prayer time siginified by the date given
-   * @param  {Date}      date       The date for which to get prayer times
-   * @param  {Function}  callback   What to do once we have the prayer times
-   * @param  {boolean}   sync       Whether or not this is a synchronous callback
-   */
-  var useDate = function (date, callback, sync) {
-    var dateToUse = new Date();
-    // Sets todays prayer times to the date givens prayer times
-    if (date == 'tomorrow') {
-      dateToUse.setHours(0);
-      dateToUse.setMinutes(0);
-      dateToUse = new Date(dateToUse.getTime() + 24 * 60 * 60 * 1000);
-    }
-
-    //Request prayer time using the date
-    requestTodayPrayerTimes(function (data) {
-      today = data.response;
-      callback(data);
-    }, dateToUse, sync);
-  }
-  that.useDate = useDate;
-
-  var init = function () {
+  var init = function(forced) {
     // Get nearest mosques or load last used mosque
     // Get the prayer times (whole year).
-  }
+    return that;
+  };
+
+
+
+  that = {
+    prayers: prayers,
+    PRAYER: PRAYER,
+    mosque: mosque,
+    today: today,
+    next: next
+  };
+
+  that.ajax = ajax;
+  that.clearLocalStorage = clearLocalStorage;
+  that.useMosque = useMosque;
+  that.init = init;
+  that.prayerPassed = prayerPassed;
+  that.fire = fire;
+  that.on = on;
+
+
+
 
 
   //Constructor
   return that;
-}
+};

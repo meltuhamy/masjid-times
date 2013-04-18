@@ -1,29 +1,29 @@
-
+var mt;
 var masjidConfig = {url: window.location.origin+'/masjid/', debug: false};
 var usingTomorrow = false;
 
 
 var updatePrayerTimes = function(times){
   //Go through each prayer and update its html.
-  for(var i = 0; i<masjidTimes.prayers.length; i++){
-    $('.'+masjidTimes.prayers[i]+'-time').html(times[masjidTimes.prayers[i]]);
+  for(var i = 0; i<mt.prayers.length; i++){
+    $('.'+mt.prayers[i]+'-time').html(times[mt.prayers[i]]);
   }
 
   // Check for next prayer periodically
   // Update next prayer counter now then check periodically
-  //nextPrayerCounter(masjidTimes.updateSecondsRemaining());
-  //masjidTimes.nextPrayerInterval(nextPrayerCounter);
+  //nextPrayerCounter(mt.updateSecondsRemaining());
+  //mt.nextPrayerInterval(nextPrayerCounter);
 }
 
 var nearestMosqueCallback = function(mosque){
-  //Tell masjidTimes to use this mosque from now on.
-  masjidTimes.useMosque(mosque);
+  //Tell mt to use this mosque from now on.
+  mt.useMosque(mosque);
 
   //Update any mosque name place holders.
   $('.mosque-name').html(mosque.name);
 
   //Populate today's times.
-  masjidTimes.requestTodayPrayerTimes(function(data){
+  mt.requestTodayPrayerTimes(function(data){
     updatePrayerTimes(data.response);
   });
 }
@@ -31,7 +31,7 @@ var nearestMosqueCallback = function(mosque){
 var doButtonListeners = function(){
   $('#settings-clearcache').click(function(){
     //Clear the cache and reload.
-    masjidTimes.clearLocalStorage();
+    mt.clearLocalStorage();
     window.location.reload();
   });
 }
@@ -39,16 +39,15 @@ var doButtonListeners = function(){
 $(document).ready(function(){
   // Button listeners
   doButtonListeners();
-  masjidTimes = newMasjidTimes(masjidConfig);
-  masjidTimes.getNearestMosque(nearestMosqueCallback);
+  mt = newMasjidTimes(masjidConfig);
 
   // Get the nearest mosques
-  masjidTimes.on('mosques', function(nearestMosques){
+  mt.on('mosques', function(nearestMosques){
     // Let the user pick a mosque
     
   });
 
-  masjidTimes.init();
+  mt.init();
 
   // Let user choose a mosque
   // Ready should get fired sometime
