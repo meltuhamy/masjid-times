@@ -118,7 +118,8 @@ var newMasjidTimes = function (config, my) {
     mosques: $.Callbacks(),     // Got nearest mosques
     mosque: $.Callbacks(),      // Mosque has been chosen
     prayertimes: $.Callbacks(), // Got prayer times
-    debug: $.Callbacks()        // Event that is used for debugging what events got fired etc.
+    debug: $.Callbacks(),       // Event that is used for debugging what events got fired etc.
+    tick: $.Callbacks()         // Time tick
   };
 
 
@@ -182,6 +183,22 @@ var newMasjidTimes = function (config, my) {
     ajax.get('table/'+ options.id, options, callback);
   };
 
+
+  /**
+   * Takes care of timing events etc.
+   * @type {{start, stop, id}}
+   */
+  var ticker = {};
+  ticker.start = function(){
+    ticker.stop();
+    ticker.id = setInterval(function(){
+      fire('tick');
+    }, 1000);
+  };
+
+  ticker.stop = function(){
+    clearInterval(ticker.id);
+  }
 
   /**
    * Clears all local storage stored by masjidTimes
@@ -336,6 +353,12 @@ var newMasjidTimes = function (config, my) {
 
   on('ready', function(){
     initialised = true;
+    ticker.start();
+    // Start ticker
+  });
+
+  on('tick', function(){
+
   });
 
   var ready = function(callback){
