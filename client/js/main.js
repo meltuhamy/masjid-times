@@ -41,13 +41,16 @@ $(document).ready(function(){
   doButtonListeners();
   mt = newMasjidTimes(masjidConfig);
 
+  // Ask for location
+  navigator.geolocation.getCurrentPosition(function(positionData){
+    mt.init(positionData.coords);
+  });
+
   // Get the nearest mosques
   mt.on('mosques', function(nearestMosques){
     // Let the user pick a mosque
-    
+    mt.useMosque(nearestMosques[0]);
   });
-
-  mt.init();
 
   // Let user choose a mosque
   // Ready should get fired sometime

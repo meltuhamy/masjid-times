@@ -53,8 +53,8 @@ var newMasjidTimes = function (config, my) {
    * @property {string} mosque         The mosque we are using
    */
   var l = {
-    prayerTimes: 'prayerTimes',
-    nearestMosque: 'nearestMosque'
+    prayer: 'prayerTimes',
+    mosque: 'nearestMosque'
   };
 
   /**
@@ -64,6 +64,18 @@ var newMasjidTimes = function (config, my) {
    * @property {Object} times  The prayer times we are using
    */
   var using = {};
+
+  /**
+   * Whether or not masjidTimes has been initialised (i.e. whether or not 'ready' has been fired)
+   * @type {boolean}
+   */
+  var initialised = false;
+
+  /**
+   * If we're waiting for a mosque to be selected
+   * @type {boolean}
+   */
+  var triggeredMosqueSelection = false;
 
 
 
@@ -76,16 +88,19 @@ var newMasjidTimes = function (config, my) {
    * @type {Object}
    */
   var events = {
-    ready: $.Callbacks(),   // Got prayer data and mosque data
-    prayer: $.Callbacks(),  // A prayer has passed
-    fajr: $.Callbacks(),    // Fajr has passed
-    shuruq: $.Callbacks(),  // Shuruq has passed
-    duhr: $.Callbacks(),    // Duhr has passed
-    asr: $.Callbacks(),     // Asr has passed
-    asr2: $.Callbacks(),    // Asr (hanafi) has passed
-    maghrib: $.Callbacks(), // Maghrib has passed
-    isha: $.Callbacks(),    // Isha has passed
-    mosques: $.Callbacks()  // Got nearest mosques
+    ready: $.Callbacks(),       // Got prayer data and mosque data
+    prayer: $.Callbacks(),      // A prayer has passed
+    fajr: $.Callbacks(),        // Fajr has passed
+    shuruq: $.Callbacks(),      // Shuruq has passed
+    duhr: $.Callbacks(),        // Duhr has passed
+    asr: $.Callbacks(),         // Asr has passed
+    asr2: $.Callbacks(),        // Asr (hanafi) has passed
+    maghrib: $.Callbacks(),     // Maghrib has passed
+    isha: $.Callbacks(),        // Isha has passed
+    mosques: $.Callbacks(),     // Got nearest mosques
+    mosque: $.Callbacks(),      // Mosque has been chosen
+    prayertimes: $.Callbacks(), // Got prayer times
+    debug: $.Callbacks()        // Event that is used for debugging what events got fired etc.
   };
 
 
@@ -107,13 +122,14 @@ var newMasjidTimes = function (config, my) {
    * @param {function} [errorCallback] Called when there was an error. Optional
    */
   ajax.get = function (url, data, callback, errorCallback) {
-    $.ajax({url: config.url + url, data: prepareData(data), type: 'GET', cache: true}).done(function (responseData) {
+    var req = prepareData(data);
+    var reqUrl = config.url + url;
+    $.ajax({url: reqUrl, data: req, type: 'GET', cache: true}).done(function (responseData) {
       responseData = toJSON(responseData);
-      callback($.extend(responseData, {_request: data}));
+      callback($.extend(responseData, {_request: req}));
     }).error(function (errorData) {
           if (errorCallback == undefined) {
-            console.error("AJAX Error");
-            console.error(errorData);
+            console.error({url: reqUrl, request:req, response: "AJAX Error: "+errorData.statusText+" ("+errorData.status+") : "+errorData.responseText});
           } else {
             errorCallback(errorData);
           }
@@ -154,7 +170,7 @@ var newMasjidTimes = function (config, my) {
    */
   var clearLocalStorage = function () {
     for (var k in l) {
-      if (l.hasOwnProperty(k)) $.deleteKey(k);
+      if (l.hasOwnProperty(k)) $.jStorage.deleteKey(k);
     }
   };
 
@@ -259,7 +275,7 @@ var newMasjidTimes = function (config, my) {
     var callback = events[event];
     if (callback) {
       // Add callback to the queue
-      if (typeof callback == 'function') {
+      if (typeof callback.fire == 'function') {
         callback.add(newCallback);
       }
     }
@@ -271,9 +287,40 @@ var newMasjidTimes = function (config, my) {
     var callback = events[event];
     if (callback) {
       callback.fire(args);
+      events.debug.fire({event: event, args: args});
     }
     return that;
   };
+
+
+  on('debug', function(data){
+    console.log("Event "+data.event+" fired!");
+    console.log(data);
+  });
+
+  on('mosque', function(mosque){
+    // Someone has chosen a mosque.
+    using.mosque = mosque;
+    $.jStorage.set(l.mosque, mosque);
+
+    if(!initialised){
+      checkInit();
+    }
+  });
+
+  on('prayertimes', function(prayerTimes){
+    // We have got the prayer times.
+    using.prayer = prayerTimes;
+    $.jStorage.set(l.prayer, prayerTimes);
+    if(!initialised){
+      checkInit();
+    }
+  });
+
+  on('ready', function(){
+    initialised = true;
+    console.log("masjidTimes initialised!");
+  });
 
 
 
@@ -283,30 +330,102 @@ var newMasjidTimes = function (config, my) {
    * @param {Object} mosque  A mosque object
    */
   var useMosque = function(mosque){
-    using.mosque = mosque;
+    // Fire the mosque event
+    fire('mosque', mosque);
+  };
+
+  /**
+   * Checks if we have enough data loaded that we can consider masjidTimes ready
+   * @returns {Boolean} True if masjidTimes is ready.
+   */
+  var isReady = function(){
+    return isStorageReady() && isUsingReady();
+  };
+
+  /**
+   * Checks if masjidTimes has loaded stuff into memory yet
+   * @returns {boolean} True if everything's loaded up
+   */
+  var isUsingReady = function(){
+    return using != undefined && using.mosque != undefined && using.prayer != undefined;
+  };
+
+  /**
+   * Checks if everything that needs to be stored in local storage has been stored or not.
+   * @returns {boolean} True if everything's been stored.
+   */
+  var isStorageReady = function(){
+    return $.jStorage.get(l.mosque) != undefined && $.jStorage.get(l.prayer) != undefined;
+  };
+
+  /**
+   * Gets data from local storage and puts it into using.
+   */
+  var loadFromStorage = function(){
+    using.mosque = $.jStorage.get(l.mosque);
+    using.prayer = $.jStorage.get(l.prayer);
+  }
+
+  /**
+   * Gets data from using and puts it into local storage.
+   */
+  var putToStorage = function(){
+    $.jStorage.set(l.mosque, using.mosque);
+    $.jStorage.set(l.prayer, using.prayer);
+  }
+
+
+  var checkInit = function(forced){
+    if(forced){
+      clearLocalStorage();
+    }
+    if(isReady()){
+      fire('ready');
+    } else if(isStorageReady() && !isUsingReady()){
+      // Case when there is stuff in storage but isn't loaded yet:
+      loadFromStorage();
+      fire('ready');
+    } else if(isUsingReady() && !isStorageReady()){
+      // Case when using is ready but we haven't stored it to local storage
+      putToStorage();
+      fire('ready');
+    } else{
+      // Case when nothing is ready.
+      // Here we need to request from server if we haven't already.
+      if(using.mosque == undefined && !triggeredMosqueSelection){
+        // We don't have a mosque chosen yet.
+        ajax.nearestMosques(using.coords, function(nearestMosques){
+          fire('mosques', nearestMosques);
+          triggeredMosqueSelection = true;
+        });
+      }
+
+      if(using.prayer == undefined && using.mosque != undefined){
+        // TODO: Match the mosque's prayer times id with the using.prayer id in this if check
+        // We have a mosque chosen but don't have its prayer times yet.
+        ajax.prayerTimesById({id: using.mosque.prayerid}, function(prayerTimes){
+          fire('prayertimes', prayerTimes);
+        });
+      }
+    }
   };
 
 
   /**
    * Loads stuff from local storage. If forced, then does a new request.
-   * @param {boolean} forced If true, empties local storage and requests new thing from server.
+   * @param {{longitude:Number, latitude:Number}} [coords] The user's location
+   * @param {boolean} [forced] If true, empties local storage and requests new thing from server.
    * @returns {Object}
    */
-  var init = function(forced) {
-    // Get nearest mosques or load last used mosque
-    // Get the prayer times (whole year).
+  var init = function(coords, forced) {
+    using.coords = {lat: coords.latitude, long: coords.longitude};
+    checkInit(forced);
     return that;
   };
 
 
 
-  that = {
-    prayers: prayers,
-    PRAYER: PRAYER,
-    mosque: mosque,
-    today: today,
-    next: next
-  };
+  that = using;
 
   that.ajax = ajax;
   that.clearLocalStorage = clearLocalStorage;
