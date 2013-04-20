@@ -47,15 +47,16 @@ var newMasjidTimes = function (config, my) {
 
   /**
    * Gets a date object with some augmented properties.
-   * @param [options]   Will be passed into the Date constructor.
+   * @param [options]   Will be passed into the Date constructor. If this is a date object, then that object will be used.
    * @returns {Date}  The date object with some augmented properties e.g. date.day
    */
   var getDate = function(options){
-    var date = options == undefined ? new Date() : new Date(options);
+    var date = options == undefined ? new Date() : ($.type(options) == 'date' ? options : new Date(options));
     date.day = date.getDate();
     date.month = date.getMonth()+1;
     return date;
   }
+
   /**
    * Today's date
    * @type {Date}
@@ -448,11 +449,19 @@ var newMasjidTimes = function (config, my) {
    */
   var times = {};
 
+  /**
+   * Gets the prayer times for a specific date.
+   * @param date
+   */
+  times.getDay = function(date){
+    var date = getDate(date);
+    return $.grep(using.prayer, function(element, index){return element.month == date.month && element.day == date.day;})[0];
+  }
 
   times.getToday = function(){
     if(initialised){
       // Search the prayer times for todays date.
-      return $.grep(using.prayer, function(element, index){return element.month == today.month && element.day == today.day;})[0];
+      return times.getDay(today);
     }
   }
 
