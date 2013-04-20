@@ -58,12 +58,6 @@ var newMasjidTimes = function (config, my) {
   }
 
   /**
-   * Today's date
-   * @type {Date}
-   */
-  var today = getDate();
-
-  /**
    * This object is basically a namespace for all the localStorage objects
    * used by MasjidTimes.
    * @type {Object}
@@ -358,6 +352,7 @@ var newMasjidTimes = function (config, my) {
   });
 
   on('tick', function(){
+    // Check if today is outdated
 
   });
 
@@ -468,7 +463,7 @@ var newMasjidTimes = function (config, my) {
 
   /**
    * A set of properties and methods to do with prayer times.
-   * @type {{getToday}}
+   * @type {{getDay, getToday, today}}
    */
   var times = {};
 
@@ -477,16 +472,32 @@ var newMasjidTimes = function (config, my) {
    * @param date
    */
   times.getDay = function(date){
-    var date = getDate(date);
+    date = getDate(date);
+    // TODO: Create new version of grep which has indexing (e.g. skip a month if wrong month)
     return $.grep(using.prayer, function(element, index){return element.month == date.month && element.day == date.day;})[0];
-  }
+  };
 
+  /**
+   * Gets the prayer times for today
+   * @returns {*}
+   */
   times.getToday = function(){
     if(initialised){
       // Search the prayer times for todays date.
-      return times.getDay(today);
+      var realToday = getDate();
+      if(times.today !== undefined && realToday.day == times.today.day && realToday.month == times.today.month){
+        //console.debug("Cache hit");
+        return times.today;
+      } else {
+        //console.debug("Cache miss");
+        return times.today = times.getDay(realToday);
+      }
+    } else{
+      throw "MasjidTimes is not initialised.";
     }
-  }
+  };
+
+
 
 
 
