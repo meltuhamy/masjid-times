@@ -3,29 +3,15 @@ var masjidConfig = {url: window.location.origin+'/masjid/', debug: false};
 var usingTomorrow = false;
 
 
-var updatePrayerTimes = function(times){
-  //Go through each prayer and update its html.
-  for(var i = 0; i<mt.prayers.length; i++){
-    $('.'+mt.prayers[i]+'-time').html(times[mt.prayers[i]]);
-  }
-
-  // Check for next prayer periodically
-  // Update next prayer counter now then check periodically
-  //nextPrayerCounter(mt.updateSecondsRemaining());
-  //mt.nextPrayerInterval(nextPrayerCounter);
-}
-
-var nearestMosqueCallback = function(mosque){
-  //Tell mt to use this mosque from now on.
-  mt.useMosque(mosque);
-
+var populateTimes = function(mosque){
   //Update any mosque name place holders.
   $('.mosque-name').html(mosque.name);
 
   //Populate today's times.
-  mt.requestTodayPrayerTimes(function(data){
-    updatePrayerTimes(data.response);
-  });
+  var times = mt.times.getToday();
+  for(var i = 0; i<mt.prayers.length; i++){
+    $('.'+mt.prayers[i]+'-time').html(times[mt.prayers[i]]);
+  }
 }
 
 var doButtonListeners = function(){
@@ -48,8 +34,12 @@ $(document).ready(function(){
 
   // Get the nearest mosques
   mt.on('mosques', function(nearestMosques){
-    // Let the user pick a mosque
+    // TODO: Let the user pick a mosque
     mt.useMosque(nearestMosques[0]);
+  });
+
+  mt.ready(function(){
+    populateTimes(mt.mosque);
   });
 
   // Let user choose a mosque

@@ -46,6 +46,23 @@ var newMasjidTimes = function (config, my) {
   };
 
   /**
+   * Gets a date object with some augmented properties.
+   * @param [options]   Will be passed into the Date constructor.
+   * @returns {Date}  The date object with some augmented properties e.g. date.day
+   */
+  var getDate = function(options){
+    var date = options == undefined ? new Date() : new Date(options);
+    date.day = date.getDate();
+    date.month = date.getMonth()+1;
+    return date;
+  }
+  /**
+   * Today's date
+   * @type {Date}
+   */
+  var today = getDate();
+
+  /**
    * This object is basically a namespace for all the localStorage objects
    * used by MasjidTimes.
    * @type {Object}
@@ -294,8 +311,7 @@ var newMasjidTimes = function (config, my) {
 
 
   on('debug', function(data){
-    console.log("Event "+data.event+" fired!");
-    console.log(data);
+    console.debug({Event : data.event, args: data.args});
   });
 
   on('mosque', function(mosque){
@@ -319,8 +335,11 @@ var newMasjidTimes = function (config, my) {
 
   on('ready', function(){
     initialised = true;
-    console.log("masjidTimes initialised!");
   });
+
+  var ready = function(callback){
+    on('ready', callback);
+  }
 
 
 
@@ -423,9 +442,26 @@ var newMasjidTimes = function (config, my) {
     return that;
   };
 
+  /**
+   * A set of properties and methods to do with prayer times.
+   * @type {{getToday}}
+   */
+  var times = {};
+
+
+  times.getToday = function(){
+    if(initialised){
+      // Search the prayer times for todays date.
+      return $.grep(using.prayer, function(element, index){return element.month == today.month && element.day == today.day;})[0];
+    }
+  }
+
 
 
   that = using;
+  that.times = times;
+  that.prayers = prayers;
+  that.ready = ready;
 
   that.ajax = ajax;
   that.clearLocalStorage = clearLocalStorage;
