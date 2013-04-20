@@ -29,7 +29,7 @@ $(document).ready(function(){
 
   // Ask for location
   navigator.geolocation.getCurrentPosition(function(positionData){
-    mt.init(positionData.coords);
+    mt.init(positionData.coords, true);
   });
 
   // Get the nearest mosques

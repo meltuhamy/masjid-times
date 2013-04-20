@@ -199,7 +199,7 @@ var newMasjidTimes = function (config, my) {
    */
   var clearLocalStorage = function () {
     for (var k in l) {
-      if (l.hasOwnProperty(k)) $.jStorage.deleteKey(k);
+      if (l.hasOwnProperty(k)) $.jStorage.deleteKey(l[k]);
     }
   };
 
@@ -225,68 +225,6 @@ var newMasjidTimes = function (config, my) {
     return data;
   };
 
-  /**
-   * Turns a time string of the form "hours:minutes" into an object
-   * with properties hours and minutes
-   * @param  {String} timeString The time string e.g. 04:00
-   * @return {{hours:Number, minutes:Number}}    Object literal with properties hours, minutes
-   */
-  var stringToHoursMinutes = function (timeString) {
-    var split = timeString.split(":");
-    return {hours: parseInt(split[0]), minutes: parseInt(split[1])};
-  };
-
-  /**
-   * Turns a time string of the form "hours:minutes" into a date object
-   * @param  {String} timeString The string to convert
-   * @return {Date}              Today's date at that time.
-   */
-  var stringToTodayDate = function (timeString) {
-    var split, now;
-    split = stringToHoursMinutes(timeString);
-    now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate(), split.hours, split.minutes, 0, 0);
-  };
-
-  /**
-   * Has the given prayer passed yet?
-   * @param  {string} prayer The prayer in question e.g. 'fajr'
-   * @return {boolean}       True if the prayer has passed the current time (e.g. true if fajr was in the past)
-   */
-  var prayerPassed = function (prayer) {
-    return new Date() >= stringToTodayDate(today[prayer]);
-  };
-
-  /**
-   * Uses today's time to calculate what the next prayer will be.
-   * @param  {Date} fromDate The date we want to calculate the nearest prayer from.
-   * @return {string}        The nearest (next prayer) after the date given (e.g. 'fajr')
-   */
-  var calculateNextPrayer = function (fromDate) {
-    var now = fromDate === undefined ? new Date() : fromDate;
-    now.setSeconds(0); // Ensures no annoying rounding stuff.
-
-    // Tomorrow's fajr if isha is past
-    if (prayerPassed('isha')) {
-      return 'fajr';
-    }
-
-    var nearestPrayer = '';
-    var minDiff = 86400000; // 24 hours (i.e. max diff initially)
-
-    for (var i = 0; i < prayers.length; i++) {
-      var prayer = prayers[i]; // e.g. "fajr" is first
-      var prayerDate = stringToTodayDate(today[prayer]);
-      var diff = prayerDate - now;
-
-      // Only consider times in the future.
-      if (diff >= 0 && diff < minDiff) {
-        minDiff = diff;
-        nearestPrayer = prayer;
-      }
-    }
-    return nearestPrayer;
-  };
 
 
                                               /*--------------------*
@@ -441,7 +379,7 @@ var newMasjidTimes = function (config, my) {
       if(using.prayer == undefined && using.mosque != undefined){
         // TODO: Match the mosque's prayer times id with the using.prayer id in this if check
         // We have a mosque chosen but don't have its prayer times yet.
-        ajax.prayerTimesById({id: using.mosque.prayerid}, function(prayerTimes){
+        ajax.prayerTimesById({id: using.mosque.prayertimes_id}, function(prayerTimes){
           fire('prayertimes', prayerTimes);
         });
       }
@@ -497,6 +435,69 @@ var newMasjidTimes = function (config, my) {
     }
   };
 
+  times.getNext = function(){
+    var today = times.getToday();
+    var nextPrayer, nextPrayerDifference, nextPrayerDate = undefined;
+    var counter = 0;
+
+    while(nextPrayer == undefined){
+      // The next date to check:
+      // Get the prayer times for the date of (today's date + counter * 1 day)
+      var nextPrayerTimes = times.getDay(nextPrayerDate = getDate(getDate().getTime() + counter * 86400000));
+      $.each(prayers, function(index, prayer){
+        // For each prayer (e.g. 'fajr'), find out what that prayers difference is.
+        var difference = times.stringToDate(nextPrayerTimes[prayer]) - getDate();
+        if(difference > 0){
+          // This is the next prayer
+          nextPrayer = prayer;
+          nextPrayerDifference = difference;
+          return false; //Break out of the loop
+        }
+      });
+      counter++;
+    }
+
+    return {prayer: nextPrayer, remaining: nextPrayerDifference, date: nextPrayerDate};
+  };
+
+  times.findNext = function(){
+
+  };
+
+
+  /**
+   * Turns a time string of the form "hours:minutes" into an object
+   * with properties hours and minutes
+   * @param  {String} timeString The time string e.g. 04:00
+   * @return {{hours:Number, minutes:Number}}    Object literal with properties hours, minutes
+   */
+  times.stringToHoursMinutes = function (timeString) {
+    var split = timeString.split(":");
+    return {hours: parseInt(split[0]), minutes: parseInt(split[1])};
+  };
+
+  /**
+   * Turns a time string of the form "hours:minutes" into a date object
+   * @param  {String} timeString The string to convert
+   * @param  {Date}  [date]      The date to match. If not set, gets today's date
+   * @return {Date}              Today's date at that time.
+   */
+  times.stringToDate = function (timeString, date) {
+    var split, now, newDate;
+    split = times.stringToHoursMinutes(timeString);
+    now = getDate(date);
+    return new Date(now.getFullYear(), now.getMonth(), now.day, split.hours, split.minutes, 0, 0);
+  };
+
+  /**
+   * Has the given prayer passed yet?
+   * @param  {string} prayer The prayer in question e.g. 'fajr'
+   * @return {boolean}       True if the prayer has passed the current time (e.g. true if fajr was in the past)
+   */
+  times.prayerPassed = function (prayer) {
+    return new Date() >= times.stringToDate(today[prayer]);
+  };
+
 
 
 
@@ -510,7 +511,6 @@ var newMasjidTimes = function (config, my) {
   that.clearLocalStorage = clearLocalStorage;
   that.useMosque = useMosque;
   that.init = init;
-  that.prayerPassed = prayerPassed;
   that.fire = fire;
   that.on = on;
 
