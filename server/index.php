@@ -34,19 +34,28 @@ function db_json_error($app, $message='There is a problem with the database.'){
   json_error($app, $message, 503);
 }
 
-function getDebugDay($month, $day, $offset){
-  return array(
-    'id' => -1,
-    'month' => $month,
-    'day' => $day,
-    'fajr' => date("H:i", time() + $offset),
-    'shuruq' => date("H:i", time() + $offset +60),
-    'duhr' => date("H:i", time() + $offset + 60*2),
-    'asr' => date("H:i", time() + $offset + 60*3),
-    'asr2' => date("H:i", time() + $offset + 60*4),
-    'maghrib' => date("H:i", time() + $offset + 60*5),
-    'isha' => date("H:i", time() + $offset + 60*6)
-  );
+function getDebugDay($month, $day, $nextPrayer, $offset){
+  // Look for the next prayer
+  $prayers = array('fajr', 'shuruq', 'duhr', 'asr', 'asr2', 'maghrib', 'isha');
+  $prayerTimes = array('id' => -1, 'month' => $month, 'day' => $day);
+  $prayerReachedIndex = -1;
+  for($i=0; $i < count($prayers); $i++){
+      if($prayers[$i] == $nextPrayer){
+          // Just + offset
+          $prayerReachedIndex = $i;
+          $difference = 59;
+          $prayerTimes[$prayers[$i]] =  date("H:i", strtotime("- $difference minutes"));
+      } else if($prayerReachedIndex == -1){
+          $difference = 59 + (count($prayers)-$i);
+          $prayerTimes[$prayers[$i]] =  date("H:i", strtotime("- $difference minutes"));
+      } else if($i > $prayerReachedIndex){
+          // e.g. found at i=5, now i=6, so this prayer is 6-5
+          $difference = 59 - ($i-$prayerReachedIndex);
+          $prayerTimes[$prayers[$i]] =  date("H:i", strtotime("- $difference minutes"));
+      }
+  }
+
+  return $prayerTimes;
 }
 
 
@@ -64,8 +73,9 @@ function getDebugDay($month, $day, $offset){
  * @return mixed           The array/string to output
  */
 function getDebugPrayerTimes($month, $day, $prayer){
-  $DST = 60*60;
-  $offset = (isset($_GET['offset']) ? intval($_GET['offset']) : 180) - $DST;
+  //$DST = 60; // Minutes
+  $offset = (isset($_GET['offset']) ? intval($_GET['offset']) : 1);
+  $nextPrayer = isset($_GET['next']) ? $_GET['next'] : 'fajr';
   $setMonth = isset($month);
   $setDay = isset($day);
   $setPrayer = isset($prayer);
@@ -73,18 +83,18 @@ function getDebugPrayerTimes($month, $day, $prayer){
     $yearTimes = array();
     for($month=1; $month<=12; $month++){
       for($day=1; $day<=31; $day++){
-        $yearTimes[]= getDebugDay($month, $day, $offset);
+        $yearTimes[]= getDebugDay($month, $day, $nextPrayer, $offset);
       }
     }
     return $yearTimes;
   } else if ($setMonth && !$setDay) {
     $monthTimes = array();
     for($day=1; $day<=31; $day++){
-      $monthTimes []= getDebugDay($month, $day, $offset);
+      $monthTimes []= getDebugDay($month, $day, $nextPrayer,$offset);
     }
     return $monthTimes;
   } else if($setDay && $setMonth && !$setPrayer){
-    return getDebugDay($month, $day, $offset);
+    return getDebugDay($month, $day, $nextPrayer, $offset);
   } else if($setMonth && $setDay && $setPrayer){
     return date("H:i", time() + $offset);
   }

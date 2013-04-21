@@ -51,7 +51,7 @@ var newMasjidTimes = function (config, my) {
    * @returns {Date}  The date object with some augmented properties e.g. date.day
    */
   var getDate = function(options){
-    var date = options == undefined ? new Date() : ($.type(options) == 'date' ? options : new Date(options));
+    var date = options == undefined ? new Date() : ($.type(options) == 'date' ? new Date(options.getTime()) : new Date(options));
     date.day = date.getDate();
     date.month = date.getMonth()+1;
     return date;
@@ -222,6 +222,7 @@ var newMasjidTimes = function (config, my) {
    */
   var prepareData = function (data) {
     data.debug = config.debug ? '1' : undefined;
+    data.next = config.debug ? 'isha' : undefined;
     return data;
   };
 
@@ -401,7 +402,7 @@ var newMasjidTimes = function (config, my) {
 
   /**
    * A set of properties and methods to do with prayer times.
-   * @type {{getDay, getToday, today}}
+   * @type {{getDay, getToday, today, getNext, getDifference, stringToHoursMinutes, stringToDate, prayerPassed}}
    */
   var times = {};
 
@@ -443,10 +444,17 @@ var newMasjidTimes = function (config, my) {
     while(nextPrayer == undefined){
       // The next date to check:
       // Get the prayer times for the date of (today's date + counter * 1 day)
-      var nextPrayerTimes = times.getDay(nextPrayerDate = getDate(getDate().getTime() + counter * 86400000));
+      // The nextPrayerDate is normalised, meaning that hours, minutes, seconds are 0.
+      var nextPrayerDateTime = getDate(getDate().getTime() + counter * 86400000);
+      nextPrayerDate = times.normaliseDate(nextPrayerDateTime);
+      if(counter == 1){
+        nextPrayerDateTime = nextPrayerDate;
+      }
+
+      var nextPrayerTimes = times.getDay(nextPrayerDate);
       $.each(prayers, function(index, prayer){
         // For each prayer (e.g. 'fajr'), find out what that prayers difference is.
-        var difference = times.stringToDate(nextPrayerTimes[prayer]) - getDate();
+        var difference = times.stringToDate(nextPrayerTimes[prayer], nextPrayerDateTime) - (counter == 0 ? nextPrayerDateTime : getDate());
         if(difference > 0){
           // This is the next prayer
           nextPrayer = prayer;
@@ -460,8 +468,33 @@ var newMasjidTimes = function (config, my) {
     return {prayer: nextPrayer, remaining: nextPrayerDifference, date: nextPrayerDate};
   };
 
-  times.findNext = function(){
 
+  times.normaliseDate = function(date){
+    date = getDate(date);
+    date.setHours(0);
+    date.setMinutes(0);
+    date.setSeconds(0);
+    date.setMilliseconds(0);
+    return getDate(date);
+  };
+
+  times.getDifference = function(date1, date2){
+    date2 = date2 == undefined ? getDate() : getDate(date2);
+    date1 = getDate(date1);
+
+    // If they are the same month/day, get a straight forward distance
+    if(date1.day == date2.day && date1.month == date1.month){
+      return date1-date2;
+    } else {
+      // The dates are different, so we need to change date2's minutes, hours, seconds to 0.
+      var temp = getDate(date2);
+      date2.setHours(0);
+      date2.setMinutes(0);
+      date2.setSeconds(0);
+      date2.setMilliseconds(0);
+
+      // Now, the time difference is the time between
+    }
   };
 
 
