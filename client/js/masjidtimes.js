@@ -438,7 +438,7 @@ var newMasjidTimes = function (config, my) {
 
   times.getNext = function(){
     var today = times.getToday();
-    var nextPrayer, nextPrayerDifference, nextPrayerDate = undefined;
+    var nextPrayer, nextPrayerDifference, nextPrayerDate, prayerDateTime = undefined;
     var counter = 0;
 
     while(nextPrayer == undefined){
@@ -454,7 +454,7 @@ var newMasjidTimes = function (config, my) {
       var nextPrayerTimes = times.getDay(nextPrayerDate);
       $.each(prayers, function(index, prayer){
         // For each prayer (e.g. 'fajr'), find out what that prayers difference is.
-        var difference = times.stringToDate(nextPrayerTimes[prayer], nextPrayerDateTime) - (counter == 0 ? nextPrayerDateTime : getDate());
+        var difference = (prayerDateTime = times.stringToDate(nextPrayerTimes[prayer], nextPrayerDateTime)) - (counter == 0 ? nextPrayerDateTime : getDate());
         if(difference > 0){
           // This is the next prayer
           nextPrayer = prayer;
@@ -465,7 +465,7 @@ var newMasjidTimes = function (config, my) {
       counter++;
     }
 
-    return {prayer: nextPrayer, remaining: nextPrayerDifference, date: nextPrayerDate};
+    return {prayer: nextPrayer, remaining: nextPrayerDifference, date: prayerDateTime};
   };
 
 
