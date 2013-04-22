@@ -12,7 +12,7 @@ var populateTimes = function(mosque){
   for(var i = 0; i<mt.prayers.length; i++){
     $('.'+mt.prayers[i]+'-time').html(times[mt.prayers[i]]);
   }
-}
+};
 
 var doButtonListeners = function(){
   $('#settings-clearcache').click(function(){
@@ -20,6 +20,14 @@ var doButtonListeners = function(){
     mt.clearLocalStorage();
     window.location.reload();
   });
+};
+
+var updateRemaining = function(){
+  var next = mt.times.getNext();
+  var text = remaining.getString(next.remaining/1000);
+  $('.nextprayercounter').html(text + '  until '+ next.prayer);
+  window.document.title = next.prayer.toUpperCase()+" in " + text+" | Masjid Times";
+
 }
 
 $(document).ready(function(){
@@ -40,16 +48,12 @@ $(document).ready(function(){
 
   mt.on('tick', function(){
     // Do this every second
-    var next = mt.times.getNext();
-    $('.nextprayercounter').html(remaining.getString(next.remaining/1000)+ '  until '+ next.prayer);
-
+    updateRemaining();
   });
 
   mt.ready(function(){
     populateTimes(mt.mosque);
-
-    var next = mt.times.getNext();
-    $('.nextprayercounter').html(remaining.getString(next.remaining/1000)+ '  until '+ next.prayer);
+    updateRemaining();
   });
 
   // Let user choose a mosque
