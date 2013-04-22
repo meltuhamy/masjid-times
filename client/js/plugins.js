@@ -470,7 +470,7 @@ h?"addEventListener"in window?window.addEventListener("storage",u,!1):document.a
     }
 }());
 
-// Place any jQuery/helper plugins in here.
+//Geolocation fill
 (function($){
   if(navigator.geolocation){return;}
   var domWrite = function(){

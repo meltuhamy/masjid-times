@@ -29,7 +29,7 @@ $(document).ready(function(){
 
   // Ask for location
   navigator.geolocation.getCurrentPosition(function(positionData){
-    mt.init(positionData.coords, true);
+    mt.init(positionData.coords);
   });
 
   // Get the nearest mosques
@@ -38,8 +38,18 @@ $(document).ready(function(){
     mt.useMosque(nearestMosques[0]);
   });
 
+  mt.on('tick', function(){
+    // Do this every second
+    var next = mt.times.getNext();
+    $('.nextprayercounter').html(remaining.getString(next.remaining/1000)+ '  until '+ next.prayer);
+
+  });
+
   mt.ready(function(){
     populateTimes(mt.mosque);
+
+    var next = mt.times.getNext();
+    $('.nextprayercounter').html(remaining.getString(next.remaining/1000)+ '  until '+ next.prayer);
   });
 
   // Let user choose a mosque

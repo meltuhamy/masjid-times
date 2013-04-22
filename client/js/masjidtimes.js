@@ -290,10 +290,6 @@ var newMasjidTimes = function (config, my) {
     // Start ticker
   });
 
-  on('tick', function(){
-    // Check if today is outdated
-
-  });
 
   var ready = function(callback){
     on('ready', callback);
