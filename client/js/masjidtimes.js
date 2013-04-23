@@ -432,6 +432,12 @@ var newMasjidTimes = function (config, my) {
     }
   };
 
+  /**
+   * Gets the next prayer from now.
+   * Prayer could be the following day's fajr. Remaining is number of milliseconds till next prayer
+   * @returns {{prayer: string, remaining: Number, date: Date}}
+   */
+
   times.getNext = function(){
     var today = times.getToday();
     var nextPrayer, nextPrayerDifference, nextPrayerDate, prayerDateTime = undefined;
@@ -465,6 +471,12 @@ var newMasjidTimes = function (config, my) {
   };
 
 
+  /**
+   * Turns a datetime object into one which only has the date set and everything else set to zero.
+   * e.g. 24 March 12:32 => 24 March 00:00
+   * @param date
+   * @returns {Date}
+   */
   times.normaliseDate = function(date){
     date = getDate(date);
     date.setHours(0);
@@ -474,6 +486,12 @@ var newMasjidTimes = function (config, my) {
     return getDate(date);
   };
 
+  /**
+   * Gets the difference between two dates.
+   * @param {Date} date1 The begin date.
+   * @param {Date} date2 The end date. If not specified gets the current date.
+   * @returns {number} The number of milliseconds difference
+   */
   times.getDifference = function(date1, date2){
     date2 = date2 == undefined ? getDate() : getDate(date2);
     date1 = getDate(date1);
