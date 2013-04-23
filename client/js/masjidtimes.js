@@ -51,11 +51,25 @@ var newMasjidTimes = function (config, my) {
    * @returns {Date}  The date object with some augmented properties e.g. date.day
    */
   var getDate = function(options){
-    var date = options == undefined ? new Date() : ($.type(options) == 'date' ? new Date(options.getTime()) : new Date(options));
+    var date;
+    if(options == undefined){
+      if(times.tick == undefined){
+        date = new Date();
+      } else {
+        date = times.tick;
+      }
+    } else if(options == 'forced'){
+      date = new Date();
+    } else if($.type(options) == 'date'){
+      date = new Date(options.getTime());
+    } else {
+      date = new Date(options);
+    }
     date.day = date.getDate();
     date.month = date.getMonth()+1;
     return date;
-  }
+  };
+
 
   /**
    * This object is basically a namespace for all the localStorage objects
@@ -263,7 +277,7 @@ var newMasjidTimes = function (config, my) {
 
 
   on('debug', function(data){
-    console.debug({Event : data.event, args: data.args});
+    if(data.event != 'tick') console.debug({Event : data.event, args: data.args});
   });
 
   on('mosque', function(mosque){
@@ -291,7 +305,21 @@ var newMasjidTimes = function (config, my) {
     // Start ticker
   });
 
+  on('tick', function(){
+    var newTick = getDate('forced');
+    if(times.tick != undefined && (times.tick.day != newTick.day || times.tick.month != newTick.month)){
+      // We're on a different day than before.
+      fire('day', times.getDay(newTick));
+    }
+    // From now on, we can treat tick as the current date/time.
+    times.tick = newTick;
+  });
 
+
+  /**
+   * Same as on('ready')
+   * @param {Function} callback
+   */
   var ready = function(callback){
     on('ready', callback);
   }
@@ -444,7 +472,7 @@ var newMasjidTimes = function (config, my) {
 
     // Cache check
     var now = getDate();
-    if(times.next != undefined && times.next.date > new Date()){
+    if(times.next != undefined && times.next.date > now){
       // Cache hit; now just change remaining time.
       times.next.remaining = times.next.date - now;
       return times.next;
@@ -526,7 +554,7 @@ var newMasjidTimes = function (config, my) {
    * @return {boolean}       True if the prayer has passed the current time (e.g. true if fajr was in the past)
    */
   times.prayerPassed = function (prayer) {
-    return new Date() >= times.stringToDate(today[prayer]);
+    return getDate() >= times.stringToDate(today[prayer]);
   };
 
 
