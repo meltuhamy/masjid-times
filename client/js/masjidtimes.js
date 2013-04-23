@@ -113,7 +113,8 @@ var newMasjidTimes = function (config, my) {
     mosque: $.Callbacks(),      // Mosque has been chosen
     prayertimes: $.Callbacks(), // Got prayer times
     debug: $.Callbacks(),       // Event that is used for debugging what events got fired etc.
-    tick: $.Callbacks()         // Time tick
+    tick: $.Callbacks(),        // Time tick
+    day: $.Callbacks()          // We've just reached the end of the day.
   };
 
 
@@ -404,7 +405,7 @@ var newMasjidTimes = function (config, my) {
 
   /**
    * Gets the prayer times for a specific date.
-   * @param date
+   * @param {{month:Number, day:Number}|Date} date
    */
   times.getDay = function(date){
     date = getDate(date);
@@ -440,6 +441,15 @@ var newMasjidTimes = function (config, my) {
 
   times.getNext = function(){
     var today = times.getToday();
+
+    // Cache check
+    var now = getDate();
+    if(times.next != undefined && times.next.date > new Date()){
+      // Cache hit; now just change remaining time.
+      times.next.remaining = times.next.date - now;
+      return times.next;
+    }
+
     var nextPrayer, nextPrayerDifference, nextPrayerDate, prayerDateTime = undefined;
     var counter = 0;
 
@@ -467,7 +477,7 @@ var newMasjidTimes = function (config, my) {
       counter++;
     }
 
-    return {prayer: nextPrayer, remaining: nextPrayerDifference, date: prayerDateTime};
+    return times.next = {prayer: nextPrayer, remaining: nextPrayerDifference, date: prayerDateTime};
   };
 
 
