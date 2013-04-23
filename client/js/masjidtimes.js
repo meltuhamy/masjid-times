@@ -497,32 +497,6 @@ var newMasjidTimes = function (config, my) {
   };
 
   /**
-   * Gets the difference between two dates.
-   * @param {Date} date1 The begin date.
-   * @param {Date} date2 The end date. If not specified gets the current date.
-   * @returns {number} The number of milliseconds difference
-   */
-  times.getDifference = function(date1, date2){
-    date2 = date2 == undefined ? getDate() : getDate(date2);
-    date1 = getDate(date1);
-
-    // If they are the same month/day, get a straight forward distance
-    if(date1.day == date2.day && date1.month == date1.month){
-      return date1-date2;
-    } else {
-      // The dates are different, so we need to change date2's minutes, hours, seconds to 0.
-      var temp = getDate(date2);
-      date2.setHours(0);
-      date2.setMinutes(0);
-      date2.setSeconds(0);
-      date2.setMilliseconds(0);
-
-      // Now, the time difference is the time between
-    }
-  };
-
-
-  /**
    * Turns a time string of the form "hours:minutes" into an object
    * with properties hours and minutes
    * @param  {String} timeString The time string e.g. 04:00
