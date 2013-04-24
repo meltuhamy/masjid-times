@@ -25,10 +25,17 @@ var doButtonListeners = function(){
 var updateRemaining = function(){
   var next = mt.times.getNext();
   var textArray = remaining.getArray(next.remaining/1000);
-  textArray[0] = textArray[0] == 0 ? undefined : (textArray[0] == 1? textArray[0] + ' Hour' : textArray[0] + ' Hours' );
-  textArray[1] = textArray[1] == 0 ? undefined : (textArray[1] == 1? textArray[1] + ' Minute' : textArray[1] + ' Minutes' );
+  textArray[0] = textArray[0] == undefined || textArray[0] == 0 ? '' : (textArray[0] == 1? textArray[0] + ' Hour' : textArray[0] + ' Hours' );
+  textArray[1] = textArray[1] == undefined || textArray[1] == 0 ? '' : (textArray[1] == 1? textArray[1] + ' Minute' : textArray[1] + ' Minutes' );
 
-  var text = "" + textArray[0] + (textArray[0] == undefined? "" : ", ") + textArray[1];
+  var text = '';
+
+  if(textArray[0] == '' && textArray[1] == '' && textArray[2] != undefined){
+    // Less than a minute remaining.
+    text = ''+textArray[2] + (textArray[2] == 1 ? ' Second' : ' Seconds');
+  } else{
+    text = "" + textArray[0] + (textArray[0] == '' ? "" : ", ") + textArray[1];
+  }
   $('.nextprayercounter').html(text + '  until '+ next.prayer);
   window.document.title = next.prayer.toUpperCase()+" in " + text+" | Masjid Times";
 
