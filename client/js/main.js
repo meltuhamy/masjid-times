@@ -9,8 +9,10 @@ var populateTimes = function(mosque){
 
   //Populate today's times.
   var times = mt.times.getToday();
+  var timesTomorrow = mt.times.getTomorrow();
   for(var i = 0; i<mt.prayers.length; i++){
-    $('.'+mt.prayers[i]+'-time').html(times[mt.prayers[i]]);
+    $('.today .'+mt.prayers[i]+'-time').html(times[mt.prayers[i]]);
+    $('.tomorrow .'+mt.prayers[i]+'-time').html(timesTomorrow[mt.prayers[i]]);
   }
 };
 
@@ -60,6 +62,11 @@ $(document).ready(function(){
   mt.on('tick', function(){
     // Do this every second
     updateRemaining();
+  });
+
+  mt.on('day', function(){
+    // It's a new day :) Update today's prayer times.
+    populateTimes(mt.mosque);
   });
 
   mt.ready(function(){

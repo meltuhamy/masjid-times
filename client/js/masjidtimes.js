@@ -462,6 +462,18 @@ var newMasjidTimes = function (config, my) {
   };
 
   /**
+   * Gets the prayer times for tomorrow. Uses today's object.
+   * @returns {*}
+   */
+  times.getTomorrow = function(){
+    if(initialised){
+      return times.getDay(new Date(getDate().getTime() + 24 * 60 * 60 * 1000));
+    } else{
+      throw "MasjidTimes is not initialised.";
+    }
+  };
+
+  /**
    * Gets the next prayer from now.
    * Prayer could be the following day's fajr. Remaining is number of milliseconds till next prayer
    * @returns {{prayer: string, remaining: Number, date: Date}}
