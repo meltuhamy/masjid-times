@@ -41,7 +41,7 @@ var updateRemaining = function(){
   $('.nextprayercounter').html(text + '  until '+ next.prayer);
   window.document.title = next.prayer.toUpperCase()+" in " + text+" | Masjid Times";
 
-}
+};
 
 $(document).ready(function(){
   // Button listeners
