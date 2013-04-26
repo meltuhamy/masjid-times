@@ -51,6 +51,10 @@ $(document).ready(function(){
   // Ask for location
   navigator.geolocation.getCurrentPosition(function(positionData){
     mt.init(positionData.coords);
+  }, function(error){
+    if(error.PERMISSION_DENIED){
+      alert("Turning off location services is currently not supported. Stay tuned for updates :)");
+    }
   });
 
   // Get the nearest mosques
