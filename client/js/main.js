@@ -88,9 +88,7 @@ $(document).ready(function(){
 
   // Get the nearest mosques
   mt.on('mosques', function(nearestMosques){
-    // TODO: Let the user pick a mosque
     pickMosqueDialog(nearestMosques);
-    //mt.useMosque(nearestMosques[0]);
   });
 
   mt.on('tick', function(){
