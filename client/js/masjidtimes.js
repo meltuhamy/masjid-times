@@ -80,7 +80,8 @@ var newMasjidTimes = function (config, my) {
    */
   var l = {
     prayer: 'prayerTimes',
-    mosque: 'nearestMosque'
+    mosque: 'nearestMosque',
+    coords: 'coords'
   };
 
   /**
@@ -207,7 +208,7 @@ var newMasjidTimes = function (config, my) {
 
   ticker.stop = function(){
     clearInterval(ticker.id);
-  }
+  };
 
   /**
    * Clears all local storage stored by masjidTimes
@@ -322,7 +323,7 @@ var newMasjidTimes = function (config, my) {
    */
   var ready = function(callback){
     on('ready', callback);
-  }
+  };
 
 
 
@@ -366,7 +367,7 @@ var newMasjidTimes = function (config, my) {
   var loadFromStorage = function(){
     using.mosque = $.jStorage.get(l.mosque);
     using.prayer = $.jStorage.get(l.prayer);
-  }
+  };
 
   /**
    * Gets data from using and puts it into local storage.
@@ -374,7 +375,7 @@ var newMasjidTimes = function (config, my) {
   var putToStorage = function(){
     $.jStorage.set(l.mosque, using.mosque);
     $.jStorage.set(l.prayer, using.prayer);
-  }
+  };
 
 
   var checkInit = function(forced){
@@ -420,7 +421,20 @@ var newMasjidTimes = function (config, my) {
    * @returns {Object}
    */
   var init = function(coords, forced) {
-    using.coords = {lat: coords.latitude, long: coords.longitude};
+    if(coords == undefined){
+      // Check cache
+      var cachedCoords = $.jStorage.get(l.coords);
+      if(cachedCoords == undefined){
+        throw "MasjidTimes failed to initialised. Coordinates not defined";
+      } else{
+        // Set using to cache
+        using.coords = cachedCoords;
+      }
+    } else {
+      // Set using to coords
+      using.coords = coords;
+      $.jStorage.set(l.coords,coords);
+    }
     checkInit(forced);
     return that;
   };
@@ -577,6 +591,8 @@ var newMasjidTimes = function (config, my) {
   that.times = times;
   that.prayers = prayers;
   that.ready = ready;
+  that.storageReady  = isStorageReady();
+  that.coordsCached = function(){return $.jStorage.get(l.coords) != undefined};
 
   that.ajax = ajax;
   that.clearLocalStorage = clearLocalStorage;

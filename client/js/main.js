@@ -36,7 +36,7 @@ var updateRemaining = function(){
     // Less than a minute remaining.
     text = ''+textArray[2] + (textArray[2] == 1 ? ' Second' : ' Seconds');
   } else{
-    text = "" + textArray[0] + (textArray[0] == '' ? "" : ", ") + textArray[1];
+    text = "" + textArray[0] + (textArray[0] == '' ? "" : (textArray[1] != 0 ? ", " : "")) + textArray[1];
   }
   $('.nextprayercounter').html(text + '  until '+ next.prayer);
   window.document.title = next.prayer.toUpperCase()+" in " + text+" | Masjid Times";
@@ -48,14 +48,7 @@ $(document).ready(function(){
   doButtonListeners();
   mt = newMasjidTimes(masjidConfig);
 
-  // Ask for location
-  navigator.geolocation.getCurrentPosition(function(positionData){
-    mt.init(positionData.coords);
-  }, function(error){
-    if(error.PERMISSION_DENIED){
-      alert("Turning off location services is currently not supported. Stay tuned for updates :)");
-    }
-  });
+  // NOTE: Event handlers should be called first before init.
 
   // Get the nearest mosques
   mt.on('mosques', function(nearestMosques){
@@ -78,9 +71,18 @@ $(document).ready(function(){
     updateRemaining();
   });
 
-  // Let user choose a mosque
-  // Ready should get fired sometime
+  // Ask for location
+  if(!mt.coordsCached()){
+    navigator.geolocation.getCurrentPosition(function(positionData){
+      mt.init(positionData.coords);
+    }, function(error){
+      if(error.PERMISSION_DENIED){
+        bootbox.alert("Turning off location services is currently not supported. Stay tuned for updates :)");
+      }
+    });
+  } else {
+    mt.init();
+  }
+
 });
-
-
 
