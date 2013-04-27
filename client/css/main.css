@@ -7,3 +7,26 @@
 .nextprayercounter{
   text-transform: capitalize;
 }
+
+#mosque-list{
+    margin: 15px 0px 0px;
+}
+
+#mosque-list li{
+    border: 1px solid #D5D5D5;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    padding: 3px 5px;
+    background-color: #F3F3F3;
+    cursor: pointer;
+    list-style: none;
+}
+
+#mosque-list li:hover{
+    border: 1px solid #ACACAC;
+    background-color: #C3DEFF;
+}
+
+#mosque-list li.selected{
+    background-color: #D2FAD2;
+}

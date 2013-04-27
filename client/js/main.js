@@ -44,8 +44,39 @@ var updateRemaining = function(){
 };
 
 var pickMosqueDialog = function(mosques){
-  var text = "Assalamo Alaikom. Welcome to MasjidTimes.<br /> The focus on this app is on your nearest or preferred mosque.<br /> The following mosques are on our database";
-  bootbox.alert(text);
+  /*
+  A mosque looks like this:
+   capacity: "1100"
+   contact: "020 7736 9060"
+   description: "Arab"
+   distance: "1.4017961344562937"
+   dst-end: null
+   dst-start: null
+   id: "6"
+   lat: "51.476309"
+   location: "7 Bridges Place, Parsons Green, London, Greater London, SW6 4HW"
+   long: "-0.201616"
+   name: "Al-Muntada Al-Islami Trust"
+   prayertimes_id: "2"
+   */
+  var numMosques = mosques.length;
+  numMosques = numMosques < 5 ? numMosques : 4; // Max 4 mosques
+  var text = "The app uses prayer times from your nearest mosque. By default the mosque which is nearest to you will be used. If you prefer, you can select a mosque from below.";
+
+  text += "<ol id='mosque-list'>";
+  for(var i = 0; i< numMosques; i++){
+    var mosque = mosques[i];
+    text += "<li data-mosque-index='"+i+"'><b>"+mosque.name+"</b><br /><span class='label'>"+Math.round(mosque.distance*10)/10+" km</span> "+mosque.location+"</li>";
+  }
+  text += "</ol>";
+  bootbox.alert(text, function(){
+    mt.useMosque(mosques[$('#mosque-list').find('li.selected').data('mosque-index')]);
+  });
+  $('#mosque-list').find('li:first').addClass('selected');
+  $('#mosque-list').find('li').click(function(){
+    $('#mosque-list').find('li').removeClass('selected');
+    $(this).addClass('selected');
+  });
 };
 
 $(document).ready(function(){
@@ -58,7 +89,8 @@ $(document).ready(function(){
   // Get the nearest mosques
   mt.on('mosques', function(nearestMosques){
     // TODO: Let the user pick a mosque
-    mt.useMosque(nearestMosques[0]);
+    pickMosqueDialog(nearestMosques);
+    //mt.useMosque(nearestMosques[0]);
   });
 
   mt.on('tick', function(){
