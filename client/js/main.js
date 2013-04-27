@@ -43,6 +43,11 @@ var updateRemaining = function(){
 
 };
 
+var pickMosqueDialog = function(mosques){
+  var text = "Assalamo Alaikom. Welcome to MasjidTimes.<br /> The focus on this app is on your nearest or preferred mosque.<br /> The following mosques are on our database";
+  bootbox.alert(text);
+};
+
 $(document).ready(function(){
   // Button listeners
   doButtonListeners();

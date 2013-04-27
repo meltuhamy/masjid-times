@@ -428,11 +428,11 @@ var newMasjidTimes = function (config, my) {
         throw "MasjidTimes failed to initialised. Coordinates not defined";
       } else{
         // Set using to cache
-        using.coords = cachedCoords;
+        using.coords = {lat: cachedCoords.latitude, long:cachedCoords.longitude};
       }
     } else {
       // Set using to coords
-      using.coords = coords;
+      using.coords = {lat: coords.latitude, long:coords.longitude};
       $.jStorage.set(l.coords,coords);
     }
     checkInit(forced);
