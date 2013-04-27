@@ -70,7 +70,9 @@ var pickMosqueDialog = function(mosques){
   }
   text += "</ol>";
   bootbox.alert(text, function(){
-    mt.useMosque(mosques[$('#mosque-list').find('li.selected').data('mosque-index')]);
+    var mosque = mosques[$('#mosque-list').find('li.selected').data('mosque-index')];
+    mt.useMosque(mosque);
+    humane.log("Mosque saved:<br />"+mosque.name);
   });
   $('#mosque-list').find('li:first').addClass('selected');
   $('#mosque-list').find('li').click(function(){
