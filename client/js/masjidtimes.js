@@ -202,7 +202,7 @@ var newMasjidTimes = function (config, my) {
   ticker.start = function(){
     ticker.stop();
     ticker.id = setInterval(function(){
-      fire('tick');
+      fire('tick', times.getNext());
     }, 1000);
   };
 
@@ -306,12 +306,13 @@ var newMasjidTimes = function (config, my) {
     // Start ticker
   });
 
-  on('tick', function(){
+  on('tick', function(nextTimes){
     var newTick = getDate('forced');
     if(times.tick != undefined && (times.tick.day != newTick.day || times.tick.month != newTick.month)){
       // We're on a different day than before.
       fire('day', times.getDay(newTick));
     }
+
     // From now on, we can treat tick as the current date/time.
     times.tick = newTick;
   });

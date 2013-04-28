@@ -24,8 +24,8 @@ var doButtonListeners = function(){
   });
 };
 
-var updateRemaining = function(){
-  var next = mt.times.getNext();
+var updateRemaining = function(next){
+  next = next || mt.times.getNext();
   var textArray = remaining.getArray(next.remaining/1000);
   textArray[0] = textArray[0] == undefined || textArray[0] == 0 ? '' : (textArray[0] == 1? textArray[0] + ' Hour' : textArray[0] + ' Hours' );
   textArray[1] = textArray[1] == undefined || textArray[1] == 0 ? '' : (textArray[1] == 1? textArray[1] + ' Minute' : textArray[1] + ' Minutes' );
@@ -75,8 +75,9 @@ var pickMosqueDialog = function(mosques){
     humane.log("Mosque saved:<br />"+mosque.name);
     $('body').scrollTop(0);
   });
-  $('#mosque-list').find('li:first').addClass('selected');
-  $('#mosque-list').find('li').click(function(){
+  var mosqueList = $('#mosque-list');
+  $(mosqueList).find('li:first').addClass('selected');
+  $(mosqueList).find('li').click(function(){
     $('#mosque-list').find('li').removeClass('selected');
     $(this).addClass('selected');
   });
@@ -94,9 +95,9 @@ $(document).ready(function(){
     pickMosqueDialog(nearestMosques);
   });
 
-  mt.on('tick', function(){
+  mt.on('tick', function(next){
     // Do this every second
-    updateRemaining();
+    updateRemaining(next);
   });
 
   mt.on('day', function(){
