@@ -313,8 +313,16 @@ var newMasjidTimes = function (config, my) {
       fire('day', times.getDay(newTick));
     }
 
+    if(nextTimes.remaining <= 1000){
+      fire('prayer', nextTimes);
+    }
+
     // From now on, we can treat tick as the current date/time.
     times.tick = newTick;
+  });
+
+  on('prayer', function(nextTimes){
+    fire(nextTimes.prayer, nextTimes);
   });
 
 

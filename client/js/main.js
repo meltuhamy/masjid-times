@@ -26,20 +26,27 @@ var doButtonListeners = function(){
 
 var updateRemaining = function(next){
   next = next || mt.times.getNext();
-  var textArray = remaining.getArray(next.remaining/1000);
-  textArray[0] = textArray[0] == undefined || textArray[0] == 0 ? '' : (textArray[0] == 1? textArray[0] + ' Hour' : textArray[0] + ' Hours' );
-  textArray[1] = textArray[1] == undefined || textArray[1] == 0 ? '' : (textArray[1] == 1? textArray[1] + ' Minute' : textArray[1] + ' Minutes' );
+  var text, title;
+  if(next.remaining > 1000){
+    var textArray = remaining.getArray(next.remaining/1000);
+    textArray[0] = textArray[0] == undefined || textArray[0] == 0 ? '' : (textArray[0] == 1? textArray[0] + ' Hour' : textArray[0] + ' Hours' );
+    textArray[1] = textArray[1] == undefined || textArray[1] == 0 ? '' : (textArray[1] == 1? textArray[1] + ' Minute' : textArray[1] + ' Minutes' );
 
-  var text = '';
-
-  if(textArray[0] == '' && textArray[1] == '' && textArray[2] != undefined){
-    // Less than a minute remaining.
-    text = ''+textArray[2] + (textArray[2] == 1 ? ' Second' : ' Seconds');
-  } else{
-    text = "" + textArray[0] + (textArray[0] == '' ? "" : (textArray[1] != 0 ? ", " : "")) + textArray[1];
+    if(textArray[0] == '' && textArray[1] == '' && textArray[2] != undefined){
+      // Less than a minute remaining.
+      text = ''+textArray[2] + (textArray[2] == 1 ? ' Second' : ' Seconds');
+    } else{
+      text = "" + textArray[0] + (textArray[0] == '' ? "" : (textArray[1] != 0 ? ", " : "")) + textArray[1];
+    }
+    title = next.prayer.toUpperCase()+" in " + text+" | Masjid Times";
+    text = text + '  until '+ next.prayer;
+  } else {
+    text = 'Prayer time!';
+    title = 'Prayer time!';
   }
-  $('.nextprayercounter').html(text + '  until '+ next.prayer);
-  window.document.title = next.prayer.toUpperCase()+" in " + text+" | Masjid Times";
+  $('.nextprayercounter').html(text);
+  window.document.title = title;
+
 
 };
 
@@ -103,6 +110,13 @@ $(document).ready(function(){
   mt.on('day', function(){
     // It's a new day :) Update today's prayer times.
     populateTimes(mt.mosque);
+  });
+
+  mt.on('prayer', function(prayerTimes){
+    setTimeout(function(){
+      humane.log("Time for "+prayerTimes.prayer.toCapitalize()+ "! <span class='nextprayercounter'></span> ");
+      updateRemaining();
+    }, 1000);
   });
 
   mt.ready(function(){
