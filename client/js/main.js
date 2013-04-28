@@ -61,7 +61,7 @@ var pickMosqueDialog = function(mosques){
    */
   var numMosques = mosques.length;
   numMosques = numMosques < 5 ? numMosques : 4; // Max 4 mosques
-  var text = "The app uses prayer times from your nearest mosque. By default the mosque which is nearest to you will be used. If you prefer, you can select a mosque from below.";
+  var text = "Select a mosque";
 
   text += "<ol id='mosque-list'>";
   for(var i = 0; i< numMosques; i++){
@@ -73,6 +73,7 @@ var pickMosqueDialog = function(mosques){
     var mosque = mosques[$('#mosque-list').find('li.selected').data('mosque-index')];
     mt.useMosque(mosque);
     humane.log("Mosque saved:<br />"+mosque.name);
+    $('body').scrollTop(0);
   });
   $('#mosque-list').find('li:first').addClass('selected');
   $('#mosque-list').find('li').click(function(){
