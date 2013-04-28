@@ -90,6 +90,23 @@ var pickMosqueDialog = function(mosques){
   });
 };
 
+// Sound Manager stuff
+soundManager.setup({
+  url: 'swf/',
+  flashVersion: 9, // optional: shiny features (default = 8)// optional: ignore Flash where possible, use 100% HTML5 mode
+  // preferFlash: false,
+  onready: function() {
+    // Ready to use; soundManager.createSound() etc. can now be called.
+    window.takbir = soundManager.createSound({
+      id: 'takbir',
+      url: 'audio/takbir.ogg',
+      onload: function() { console.log('sound loaded!', this); }
+      // other options here..
+    });
+
+  }
+});
+
 $(document).ready(function(){
   // Button listeners
   doButtonListeners();
@@ -114,6 +131,7 @@ $(document).ready(function(){
 
   mt.on('prayer', function(prayerTimes){
     setTimeout(function(){
+      takbir.play();
       humane.log("Time for "+prayerTimes.prayer.toCapitalize()+ "! <span class='nextprayercounter'></span> ");
       updateRemaining();
     }, 1000);
