@@ -8,7 +8,7 @@
 
 INSERT INTO `mosque` (`id`, `prayertimes_id`, `lat`, `long`, `dst-start`, `dst-end`, `name`, `location`, `contact`, `capacity`, `description`) VALUES
 (1, 1, 54.58256, -5.941778, NULL, NULL, 'Belfast Islamic Centre', '38 Wellington Park, Belfast, BT9 6DN', '028 9066 4465', 330, ''),
-(2, 1, 54.58432, -5.930707, NULL, NULL, 'Northern Ireland Muslim Family Association', '7 Rugby Rd, Belfast, BT7 1PS', '+442890315784', 300, 'nimfa.org');
+(2, 1, 54.58432, -5.930707, NULL, NULL, 'Northern Ireland Muslim Family Association', '7 Rugby Rd, Belfast, BT7 1PS', '+442890315784', 300, 'nimfa.org'),
 (3, 2, 51.528896, -0.164669, NULL, NULL, 'Islamic Cultural Centre', '146 Park Rd, London NW8 7RG', '020 7724 3363', 5400, 'http://www.iccuk.org/'),
 (4, 2, 51.50543, -0.149034, NULL, NULL, 'Mayfair Islamic Centre', '19 Hertford St, London W1J 7RU', '020 7495 8283', 730, 'Arab - Qatari'),
 (5, 2, 51.5173, -0.065736, NULL, NULL, 'East London Mosque', '46-92 Whitechapel Rd, London E1 1JX', '020 7650 3000', 4500, 'Bangladeshi, Pakistani, Somali, Arab'),
