@@ -153,7 +153,7 @@ var newMasjidTimes = function (config, my) {
   ajax.get = function (url, data, callback, errorCallback) {
     var req = prepareData(data);
     var reqUrl = config.url + url;
-    $.ajax({url: reqUrl, data: req, type: 'GET', cache: true}).done(function (responseData) {
+    $.ajax({url: reqUrl, data: req, type: 'GET', cache: true, dataType: 'jsonp'}).done(function (responseData) {
       responseData = toJSON(responseData);
       callback($.extend(responseData, {_request: req}));
     }).error(function (errorData) {
