@@ -3,11 +3,17 @@ require 'Slim/Slim.php';
 require 'config.php';
 require 'PrayerTime.php';
 
-function getTraditionalTimes($lat, $lng, $timezone = 0)
+function getTraditionalTimes($day, $month, $lat, $lng, $timezone = 0)
 {
   global $prayTime;
 
   //TODO: Set timezone properly
+//
+//  $date = mktime(0,0,0,$month,$day,date('Y'));
+//  $links = array();
+//  for($n=1;$n <= date('t',$date);$n++){
+//    echo $n;
+//  }
   return $prayTime->getPrayerTimes(time(), $lat, $lng, $prayTime);
 }
 
