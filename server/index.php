@@ -3,18 +3,37 @@ require 'Slim/Slim.php';
 require 'config.php';
 require 'PrayerTime.php';
 
-function getTraditionalTimes($day, $month, $lat, $lng, $timezone = 0)
+
+function getTraditionalTimes($lat, $lng)
 {
   global $prayTime;
 
+  //TODO: Prayer times method (e.g. ICNA etc.) as a param
   //TODO: Set timezone properly
-//
-//  $date = mktime(0,0,0,$month,$day,date('Y'));
-//  $links = array();
-//  for($n=1;$n <= date('t',$date);$n++){
-//    echo $n;
-//  }
-  return $prayTime->getPrayerTimes(time(), $lat, $lng, $prayTime);
+  //TODO: Caching
+
+  $data = array();
+  for($month = 1; $month <= 12; $month++){
+    $date = mktime(0,0,0,$month,1,2004); // 2004 is a leap year so includes 29 Feb
+    for($day=1;$day <= date('t',$date);$day++){
+      $time = mktime(0,0,0,$month,$day,2004);
+      $times = $prayTime->getPrayerTimes($time, $lat, $lng, 0);
+      $data []= array(
+        'id'=> -1,
+        'month' => $month,
+        'day' => $day,
+        'fajr' => $times[0],
+        'shuruq' => $times[1],
+        'duhr' => $times[2],
+        'asr' => $times[3],
+        'asr2' => $times[4],
+        'maghrib' => $times[5],
+        'isha' => $times[6]
+      );
+    }
+  }
+  return $data;
+
 }
 
 /**
@@ -143,6 +162,7 @@ $app->get('/', function () use ($app) {
 
 /**
  * Gets the prayer time table for specified prayertimes id.
+ * TODO turn url :prayerid into a GET param
  */
 $app->get('/table/:prayerid', function ($prayerid) use ($app) {
   $req = $app->request();
@@ -152,9 +172,19 @@ $app->get('/table/:prayerid', function ($prayerid) use ($app) {
   $month = $req->params('month');
   $day = $req->params('day');
   $prayer = $req->params('prayer');
+  $method = $req->params('method');
 
   if ($app->debug) {
     json(getDebugPrayerTimes($month, $day, $prayer));
+    return;
+  }
+
+  if($method && $method != 'mosque'){
+    $lat = $req->params('lat');
+    $lng = $req->params('lng');
+    // TODO: Error checking here
+    // TODO: Implement day, month, prayer times
+    json(getTraditionalTimes($lat, $lng));
     return;
   }
 
