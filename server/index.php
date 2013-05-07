@@ -4,11 +4,11 @@ require 'config.php';
 require 'PrayerTime.php';
 
 
-function getTraditionalTimes($lat, $lng)
+function getTraditionalTimes($lat, $lng, $method=5)
 {
   global $prayTime;
+  $prayTime->setCalcMethod($method);
 
-  //TODO: Prayer times method (e.g. ICNA etc.) as a param
   //TODO: Set timezone properly
   //TODO: Caching
 
@@ -26,7 +26,7 @@ function getTraditionalTimes($lat, $lng)
         'shuruq' => $times[1],
         'duhr' => $times[2],
         'asr' => $times[3],
-        'asr2' => $times[4],
+        'asr2' => $times[7],
         'maghrib' => $times[5],
         'isha' => $times[6]
       );
@@ -162,17 +162,19 @@ $app->get('/', function () use ($app) {
 
 /**
  * Gets the prayer time table for specified prayertimes id.
- * TODO turn url :prayerid into a GET param
  */
-$app->get('/table/:prayerid', function ($prayerid) use ($app) {
+$app->get('/table/', function () use ($app) {
   $req = $app->request();
-  $sqlBinding = array('prayerid' => $prayerid);
 
   //Get request filtering.
   $month = $req->params('month');
   $day = $req->params('day');
   $prayer = $req->params('prayer');
   $method = $req->params('method');
+  $prayerid = $req->params('id');
+  $lat = $req->params('lat');
+  $lng = $req->params('lng');
+
 
   if ($app->debug) {
     json(getDebugPrayerTimes($month, $day, $prayer));
@@ -180,13 +182,22 @@ $app->get('/table/:prayerid', function ($prayerid) use ($app) {
   }
 
   if($method && $method != 'mosque'){
-    $lat = $req->params('lat');
-    $lng = $req->params('lng');
-    // TODO: Error checking here
+    if(!isset($lat,$lng)){
+      json_error($app, 'lat and lng must be set if using traditional calculation method.');
+      return;
+    }
+
     // TODO: Implement day, month, prayer times
-    json(getTraditionalTimes($lat, $lng));
+    json(getTraditionalTimes($lat, $lng, $method));
     return;
   }
+
+  if(!isset($prayerid)){
+    json_error($app, 'You must provide a prayer times id for this method');
+    return;
+  }
+
+  $sqlBinding = array('prayerid' => $prayerid);
 
   try {
     $sql = 'SELECT * FROM prayertimes WHERE id = :prayerid';

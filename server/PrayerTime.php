@@ -387,11 +387,12 @@ class PrayTime
         $Sunrise = $this->computeTime(180- 0.833, $t[1]);
         $Dhuhr   = $this->computeMidDay($t[2]);
         $Asr     = $this->computeAsr(1+ $this->asrJuristic, $t[3]);
+        $Asr2    = $this->computeAsr(1+ ($this->asrJuristic == 1 ? 0 : 1), $t[3]);
         $Sunset  = $this->computeTime(0.833, $t[4]);;
         $Maghrib = $this->computeTime($this->methodParams[$this->calcMethod][2], $t[5]);
         $Isha    = $this->computeTime($this->methodParams[$this->calcMethod][4], $t[6]);
 
-        return array($Fajr, $Sunrise, $Dhuhr, $Asr, $Sunset, $Maghrib, $Isha);
+        return array($Fajr, $Sunrise, $Dhuhr, $Asr, $Sunset, $Maghrib, $Isha, $Asr2);
     }
 
 
@@ -430,7 +431,7 @@ class PrayTime
     {
         if ($this->timeFormat == $this->Float)
             return $times;
-        for ($i=0; $i<7; $i++)
+        for ($i=0; $i<count($times); $i++)
             if ($this->timeFormat == $this->Time12)
                 $times[$i] = $this->floatToTime12($times[$i]);
             else if ($this->timeFormat == $this->Time12NS)

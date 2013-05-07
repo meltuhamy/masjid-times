@@ -190,7 +190,7 @@ var newMasjidTimes = function (config, my) {
    * @param {Function} callback
    */
   ajax.prayerTimesById = function (options, callback) {
-    ajax.get('table/'+ options.id, options, callback);
+    ajax.get('table/', options, callback);
   };
 
 
