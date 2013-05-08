@@ -4,7 +4,7 @@ require 'config.php';
 require 'PrayerTime.php';
 
 
-function getTraditionalTimes($lat, $lng, $method=5)
+function getTraditionalTimes($day, $month, $prayer, $lat, $lng, $method=5)
 {
   global $prayTime;
   $prayTime->setCalcMethod($method);
@@ -188,7 +188,7 @@ $app->get('/table/', function () use ($app) {
     }
 
     // TODO: Implement day, month, prayer times
-    json(getTraditionalTimes($lat, $lng, $method));
+    json(getTraditionalTimes($day, $month, $prayer, $lat, $lng, $method));
     return;
   }
 
