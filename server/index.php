@@ -1,76 +1,8 @@
 <?php
 require 'Slim/Slim.php';
 require 'config.php';
-require 'PrayerTime.php';
+require 'TraditionalTimes.class.php';
 
-
-//TODO: Refactor getTradtionalTimes* into a static class or something.
-function getTraditionalTimesDay($day, $month, $lat, $lng, $method=5)
-{
-  global $prayTime;
-  $prayTime->setCalcMethod($method);
-  $time = mktime(0,0,0,$month,$day,2004);
-
-  //TODO Set timezone param properly.
-  $times = $prayTime->getPrayerTimes($time, $lat, $lng, 0);
-  return array(
-    'id'=> -1,
-    'month' => $month,
-    'day' => $day,
-    'fajr' => $times[0],
-    'shuruq' => $times[1],
-    'duhr' => $times[2],
-    'asr' => $times[3],
-    'asr2' => $times[7],
-    'maghrib' => $times[5],
-    'isha' => $times[6]
-  );
-}
-
-function getTraditionalTimesMonth($month, $lat, $lng, $method=5)
-{
-  $date = mktime(0,0,0,$month,1,2004); // 2004 is a leap year so includes 29 Feb
-  $data = array();
-  for($day=1; $day <= date('t',$date); $day++){
-    $data []= getTraditionalTimesDay($day, $month, $lat, $lng, $method);
-  }
-  return $data;
-}
-
-function getTraditionalTimesYear($lat, $lng, $method=5)
-{
-  $data = array();
-  for($month = 1; $month <= 12; $month++){
-    $data = array_merge($data, getTraditionalTimesMonth($month, $lat, $lng, $method));
-  }
-  return $data;
-}
-
-function getTraditionalTimesPrayer($day, $month, $prayer, $lat, $lng, $method=5)
-{
-  $times = getTraditionalTimesDay($day, $month, $lat, $lng, $method);
-  return $times[$prayer];
-}
-
-function getTraditionalTimes($day, $month, $prayer, $lat, $lng, $method=5)
-{
-  //TODO: Caching
-
-  if(isset($day, $month, $prayer)){
-    return getTraditionalTimesPrayer($day, $month, $prayer, $lat, $lng, $method);
-  }
-
-  if(isset($day, $month)){
-    return getTraditionalTimesDay($day, $month, $lat, $lng, $method);
-  }
-
-  if(isset($month)){
-    return getTraditionalTimesMonth($month, $lat, $lng, $method);
-  }
-
-  // Otherwise return whole year
-  return getTraditionalTimesYear($lat, $lng, $method);
-}
 
 /**
  * A helper function that outputs the json of data.
@@ -223,8 +155,7 @@ $app->get('/table/', function () use ($app) {
       return;
     }
 
-    // TODO: Implement day, month, prayer times
-    json(getTraditionalTimes($day, $month, $prayer, $lat, $lng, $method));
+    json(TraditionalTimes::getTraditionalTimes($day, $month, $prayer, $lat, $lng, $method));
     return;
   }
 

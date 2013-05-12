@@ -620,6 +620,6 @@ class PrayTime
 
 //---------------------- prayTime Object -----------------------
 
-$prayTime = new PrayTime();
+//$prayTime = new PrayTime();
 
 ?>
