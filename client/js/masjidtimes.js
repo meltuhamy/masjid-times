@@ -5,11 +5,6 @@
  * @return {Object}        The masjid times object
  */
 var newMasjidTimes = function (config, my) {
-  //Check jQuery and jStorage requirements
-  if (!(jQuery && $.jStorage)) {
-    throw "jQuery and jStorage are required.";
-  }
-
 
                                       /*--------------------*
                                             Properties
@@ -17,6 +12,83 @@ var newMasjidTimes = function (config, my) {
   var my = my || {};
 
   var ref = this;
+
+  // Callbacks
+  var Callbacks = jQuery?jQuery.Callbacks:function(e){e=typeof e==="string"?optionsCache[e]||createOptions(e):jQuery.extend({},e);var t,n,r,i,s,o,u=[],a=!e.once&&[],f=function(c){t=e.memory&&c;n=true;o=i||0;i=0;s=u.length;r=true;for(;u&&o<s;o++){if(u[o].apply(c[0],c[1])===false&&e.stopOnFalse){t=false;break}}r=false;if(u){if(a){if(a.length){f(a.shift())}}else if(t){u=[]}else{l.disable()}}},l={add:function(){if(u){var n=u.length;(function o(t){jQuery.each(t,function(t,n){var r=jQuery.type(n);if(r==="function"){if(!e.unique||!l.has(n)){u.push(n)}}else if(n&&n.length&&r!=="string"){o(n)}})})(arguments);if(r){s=u.length}else if(t){i=n;f(t)}}return this},remove:function(){if(u){jQuery.each(arguments,function(e,t){var n;while((n=jQuery.inArray(t,u,n))>-1){u.splice(n,1);if(r){if(n<=s){s--}if(n<=o){o--}}}})}return this},has:function(e){return e?jQuery.inArray(e,u)>-1:!!(u&&u.length)},empty:function(){u=[];s=0;return this},disable:function(){u=a=t=undefined;return this},disabled:function(){return!u},lock:function(){a=undefined;if(!t){l.disable()}return this},locked:function(){return!a},fireWith:function(e,t){t=t||[];t=[e,t.slice?t.slice():t];if(u&&(!n||a)){if(r){a.push(t)}else{f(t)}}return this},fire:function(){l.fireWith(this,arguments);return this},fired:function(){return!!n}};return l}
+
+  // Extend
+  var extend = jQuery?jQuery.extend:function(){var e,t,n,r,i,s,o=arguments[0]||{},u=1,a=arguments.length,f=false;if(typeof o==="boolean"){f=o;o=arguments[1]||{};u=2}if(typeof o!=="object"&&!jQuery.isFunction(o)){o={}}if(a===u){o=this;--u}for(;u<a;u++){if((e=arguments[u])!=null){for(t in e){n=o[t];r=e[t];if(o===r){continue}if(f&&r&&(jQuery.isPlainObject(r)||(i=jQuery.isArray(r)))){if(i){i=false;s=n&&jQuery.isArray(n)?n:[]}else{s=n&&jQuery.isPlainObject(n)?n:{}}o[t]=jQuery.extend(f,s,r)}else if(r!==undefined){o[t]=r}}}}return o};
+
+  // Each
+  var each = jQuery?jQuery.each:function(e,t,n){var r,i=0,s=e.length,o=isArraylike(e);if(n){if(o){for(;i<s;i++){r=t.apply(e[i],n);if(r===false){break}}}else{for(i in e){r=t.apply(e[i],n);if(r===false){break}}}}else{if(o){for(;i<s;i++){r=t.call(e[i],i,e[i]);if(r===false){break}}}else{for(i in e){r=t.call(e[i],i,e[i]);if(r===false){break}}}}return e};
+
+  // If there is a storage methods, check and augment, otherwise use our own
+  if(config.storage != undefined && config.storage.get != undefined && config.storage.set != undefined && config.storage.remove != undefined){
+    // Use config's storage methods
+    if(config.storage.setKey == undefined){
+      // Augment it so that we can setKey
+      config.storage.setKey = function(key, value, cb){
+        var o = {};
+        o[key] = value;
+        config.storage.set(o, cb);
+      };
+    }
+  } else {
+    // JSON
+    var JSON;if(!JSON){JSON={}}(function(){"use strict";function f(e){return e<10?"0"+e:e}function quote(e){escapable.lastIndex=0;return escapable.test(e)?'"'+e.replace(escapable,function(e){var t=meta[e];return typeof t==="string"?t:"\\u"+("0000"+e.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+e+'"'}function str(e,t){var n,r,i,s,o=gap,u,a=t[e];if(a&&typeof a==="object"&&typeof a.toJSON==="function"){a=a.toJSON(e)}if(typeof rep==="function"){a=rep.call(t,e,a)}switch(typeof a){case"string":return quote(a);case"number":return isFinite(a)?String(a):"null";case"boolean":case"null":return String(a);case"object":if(!a){return"null"}gap+=indent;u=[];if(Object.prototype.toString.apply(a)==="[object Array]"){s=a.length;for(n=0;n<s;n+=1){u[n]=str(n,a)||"null"}i=u.length===0?"[]":gap?"[\n"+gap+u.join(",\n"+gap)+"\n"+o+"]":"["+u.join(",")+"]";gap=o;return i}if(rep&&typeof rep==="object"){s=rep.length;for(n=0;n<s;n+=1){if(typeof rep[n]==="string"){r=rep[n];i=str(r,a);if(i){u.push(quote(r)+(gap?": ":":")+i)}}}}else{for(r in a){if(Object.prototype.hasOwnProperty.call(a,r)){i=str(r,a);if(i){u.push(quote(r)+(gap?": ":":")+i)}}}}i=u.length===0?"{}":gap?"{\n"+gap+u.join(",\n"+gap)+"\n"+o+"}":"{"+u.join(",")+"}";gap=o;return i}}if(typeof Date.prototype.toJSON!=="function"){Date.prototype.toJSON=function(e){return isFinite(this.valueOf())?this.getUTCFullYear()+"-"+f(this.getUTCMonth()+1)+"-"+f(this.getUTCDate())+"T"+f(this.getUTCHours())+":"+f(this.getUTCMinutes())+":"+f(this.getUTCSeconds())+"Z":null};String.prototype.toJSON=Number.prototype.toJSON=Boolean.prototype.toJSON=function(e){return this.valueOf()}}var cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,escapable=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,gap,indent,meta={"\b":"\\b","	":"\\t","\n":"\\n","\f":"\\f","\r":"\\r",'"':'\\"',"\\":"\\\\"},rep;if(typeof JSON.stringify!=="function"){JSON.stringify=function(e,t,n){var r;gap="";indent="";if(typeof n==="number"){for(r=0;r<n;r+=1){indent+=" "}}else if(typeof n==="string"){indent=n}rep=t;if(t&&typeof t!=="function"&&(typeof t!=="object"||typeof t.length!=="number")){throw new Error("JSON.stringify")}return str("",{"":e})}}if(typeof JSON.parse!=="function"){JSON.parse=function(text,reviver){function walk(e,t){var n,r,i=e[t];if(i&&typeof i==="object"){for(n in i){if(Object.prototype.hasOwnProperty.call(i,n)){r=walk(i,n);if(r!==undefined){i[n]=r}else{delete i[n]}}}}return reviver.call(e,t,i)}var j;text=String(text);cx.lastIndex=0;if(cx.test(text)){text=text.replace(cx,function(e){return"\\u"+("0000"+e.charCodeAt(0).toString(16)).slice(-4)})}if(/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,"@").replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,"]").replace(/(?:^|:|,)(?:\s*\[)+/g,""))){j=eval("("+text+")");return typeof reviver==="function"?walk({"":j},""):j}throw new SyntaxError("JSON.parse")}}})();
+
+    // jStorage
+    if(!(jQuery&&jQuery.jStorage))(function(){function v(){var e=false;if("localStorage"in window){try{window.localStorage.setItem("_tmptest","tmpval");e=true;window.localStorage.removeItem("_tmptest")}catch(t){}}if(e){try{if(window.localStorage){i=window.localStorage;u="localStorage";l=i.jStorage_update}}catch(n){}}else if("globalStorage"in window){try{if(window.globalStorage){i=window.globalStorage[window.location.hostname];u="globalStorage";l=i.jStorage_update}}catch(r){}}else{s=document.createElement("link");if(s.addBehavior){s.style.behavior="url(#default#userData)";document.getElementsByTagName("head")[0].appendChild(s);try{s.load("jStorage")}catch(o){s.setAttribute("jStorage","{}");s.save("jStorage");s.load("jStorage")}var a="{}";try{a=s.getAttribute("jStorage")}catch(f){}try{l=s.getAttribute("jStorage_update")}catch(c){}i.jStorage=a;u="userDataBehavior"}else{s=null;return}}S();N();g();C();if("addEventListener"in window){window.addEventListener("pageshow",function(e){if(e.persisted){y()}},false)}}function m(){var e="{}";if(u=="userDataBehavior"){s.load("jStorage");try{e=s.getAttribute("jStorage")}catch(t){}try{l=s.getAttribute("jStorage_update")}catch(n){}i.jStorage=e}S();N();C()}function g(){if(u=="localStorage"||u=="globalStorage"){if("addEventListener"in window){window.addEventListener("storage",y,false)}else{document.attachEvent("onstorage",y)}}else if(u=="userDataBehavior"){setInterval(y,1e3)}}function y(){var e;clearTimeout(f);f=setTimeout(function(){if(u=="localStorage"||u=="globalStorage"){e=i.jStorage_update}else if(u=="userDataBehavior"){s.load("jStorage");try{e=s.getAttribute("jStorage_update")}catch(t){}}if(e&&e!=l){l=e;b()}},25)}function b(){var e=n.parse(n.stringify(r.__jstorage_meta.CRC32)),t;m();t=n.parse(n.stringify(r.__jstorage_meta.CRC32));var i,s=[],o=[];for(i in e){if(e.hasOwnProperty(i)){if(!t[i]){o.push(i);continue}if(e[i]!=t[i]&&String(e[i]).substr(0,2)=="2."){s.push(i)}}}for(i in t){if(t.hasOwnProperty(i)){if(!e[i]){s.push(i)}}}w(s,"updated");w(o,"deleted")}function w(e,t){e=[].concat(e||[]);if(t=="flushed"){e=[];for(var n in a){if(a.hasOwnProperty(n)){e.push(n)}}t="deleted"}for(var r=0,i=e.length;r<i;r++){if(a[e[r]]){for(var s=0,o=a[e[r]].length;s<o;s++){a[e[r]][s](e[r],t)}}if(a["*"]){for(var s=0,o=a["*"].length;s<o;s++){a["*"][s](e[r],t)}}}}function E(){var e=(+(new Date)).toString();if(u=="localStorage"||u=="globalStorage"){i.jStorage_update=e}else if(u=="userDataBehavior"){s.setAttribute("jStorage_update",e);s.save("jStorage")}y()}function S(){if(i.jStorage){try{r=n.parse(String(i.jStorage))}catch(e){i.jStorage="{}"}}else{i.jStorage="{}"}o=i.jStorage?String(i.jStorage).length:0;if(!r.__jstorage_meta){r.__jstorage_meta={}}if(!r.__jstorage_meta.CRC32){r.__jstorage_meta.CRC32={}}}function x(){L();try{i.jStorage=n.stringify(r);if(s){s.setAttribute("jStorage",i.jStorage);s.save("jStorage")}o=i.jStorage?String(i.jStorage).length:0}catch(e){}}function T(e){if(!e||typeof e!="string"&&typeof e!="number"){throw new TypeError("Key name must be string or numeric")}if(e=="__jstorage_meta"){throw new TypeError("Reserved key name")}return true}function N(){var e,t,n,i,s=Infinity,o=false,u=[];clearTimeout(p);if(!r.__jstorage_meta||typeof r.__jstorage_meta.TTL!="object"){return}e=+(new Date);n=r.__jstorage_meta.TTL;i=r.__jstorage_meta.CRC32;for(t in n){if(n.hasOwnProperty(t)){if(n[t]<=e){delete n[t];delete i[t];delete r[t];o=true;u.push(t)}else if(n[t]<s){s=n[t]}}}if(s!=Infinity){p=setTimeout(N,s-e)}if(o){x();E();w(u,"deleted")}}function C(){var e,t;if(!r.__jstorage_meta.PubSub){return}var n,i=h;for(e=t=r.__jstorage_meta.PubSub.length-1;e>=0;e--){n=r.__jstorage_meta.PubSub[e];if(n[0]>h){i=n[0];k(n[1],n[2])}}h=i}function k(e,t){if(c[e]){for(var r=0,i=c[e].length;r<i;r++){c[e][r](e,n.parse(n.stringify(t)))}}}function L(){if(!r.__jstorage_meta.PubSub){return}var e=+(new Date)-2e3;for(var t=0,n=r.__jstorage_meta.PubSub.length;t<n;t++){if(r.__jstorage_meta.PubSub[t][0]<=e){r.__jstorage_meta.PubSub.splice(t,r.__jstorage_meta.PubSub.length-t);break}}if(!r.__jstorage_meta.PubSub.length){delete r.__jstorage_meta.PubSub}}function A(e,t){if(!r.__jstorage_meta){r.__jstorage_meta={}}if(!r.__jstorage_meta.PubSub){r.__jstorage_meta.PubSub=[]}r.__jstorage_meta.PubSub.unshift([+(new Date),e,t]);x();E()}function O(e,t){var n=e.length,r=t^n,i=0,s;while(n>=4){s=e.charCodeAt(i)&255|(e.charCodeAt(++i)&255)<<8|(e.charCodeAt(++i)&255)<<16|(e.charCodeAt(++i)&255)<<24;s=(s&65535)*1540483477+(((s>>>16)*1540483477&65535)<<16);s^=s>>>24;s=(s&65535)*1540483477+(((s>>>16)*1540483477&65535)<<16);r=(r&65535)*1540483477+(((r>>>16)*1540483477&65535)<<16)^s;n-=4;++i}switch(n){case 3:r^=(e.charCodeAt(i+2)&255)<<16;case 2:r^=(e.charCodeAt(i+1)&255)<<8;case 1:r^=e.charCodeAt(i)&255;r=(r&65535)*1540483477+(((r>>>16)*1540483477&65535)<<16)}r^=r>>>13;r=(r&65535)*1540483477+(((r>>>16)*1540483477&65535)<<16);r^=r>>>15;return r>>>0}var e="0.4.3",t=window.jQuery||window.$||(window.$={}),n={parse:window.JSON&&(window.JSON.parse||window.JSON.decode)||String.prototype.evalJSON&&function(e){return String(e).evalJSON()}||t.parseJSON||t.evalJSON,stringify:Object.toJSON||window.JSON&&(window.JSON.stringify||window.JSON.encode)||t.toJSON};if(!n.parse||!n.stringify){throw new Error("No JSON support found, include //cdnjs.cloudflare.com/ajax/libs/json2/20110223/json2.js to page")}var r={__jstorage_meta:{CRC32:{}}},i={jStorage:"{}"},s=null,o=0,u=false,a={},f=false,l=0,c={},h=+(new Date),p,d={isXML:function(e){var t=(e?e.ownerDocument||e:0).documentElement;return t?t.nodeName!=="HTML":false},encode:function(e){if(!this.isXML(e)){return false}try{return(new XMLSerializer).serializeToString(e)}catch(t){try{return e.xml}catch(n){}}return false},decode:function(e){var t="DOMParser"in window&&(new DOMParser).parseFromString||window.ActiveXObject&&function(e){var t=new ActiveXObject("Microsoft.XMLDOM");t.async="false";t.loadXML(e);return t},n;if(!t){return false}n=t.call("DOMParser"in window&&new DOMParser||window,e,"text/xml");return this.isXML(n)?n:false}};t.jStorage={version:e,set:function(e,t,i){T(e);i=i||{};if(typeof t=="undefined"){this.deleteKey(e);return t}if(d.isXML(t)){t={_is_xml:true,xml:d.encode(t)}}else if(typeof t=="function"){return undefined}else if(t&&typeof t=="object"){t=n.parse(n.stringify(t))}r[e]=t;r.__jstorage_meta.CRC32[e]="2."+O(n.stringify(t),2538058380);this.setTTL(e,i.TTL||0);w(e,"updated");return t},get:function(e,t){T(e);if(e in r){if(r[e]&&typeof r[e]=="object"&&r[e]._is_xml){return d.decode(r[e].xml)}else{return r[e]}}return typeof t=="undefined"?null:t},deleteKey:function(e){T(e);if(e in r){delete r[e];if(typeof r.__jstorage_meta.TTL=="object"&&e in r.__jstorage_meta.TTL){delete r.__jstorage_meta.TTL[e]}delete r.__jstorage_meta.CRC32[e];x();E();w(e,"deleted");return true}return false},setTTL:function(e,t){var n=+(new Date);T(e);t=Number(t)||0;if(e in r){if(!r.__jstorage_meta.TTL){r.__jstorage_meta.TTL={}}if(t>0){r.__jstorage_meta.TTL[e]=n+t}else{delete r.__jstorage_meta.TTL[e]}x();N();E();return true}return false},getTTL:function(e){var t=+(new Date),n;T(e);if(e in r&&r.__jstorage_meta.TTL&&r.__jstorage_meta.TTL[e]){n=r.__jstorage_meta.TTL[e]-t;return n||0}return 0},flush:function(){r={__jstorage_meta:{CRC32:{}}};x();E();w(null,"flushed");return true},storageObj:function(){function e(){}e.prototype=r;return new e},index:function(){var e=[],t;for(t in r){if(r.hasOwnProperty(t)&&t!="__jstorage_meta"){e.push(t)}}return e},storageSize:function(){return o},currentBackend:function(){return u},storageAvailable:function(){return!!u},listenKeyChange:function(e,t){T(e);if(!a[e]){a[e]=[]}a[e].push(t)},stopListening:function(e,t){T(e);if(!a[e]){return}if(!t){delete a[e];return}for(var n=a[e].length-1;n>=0;n--){if(a[e][n]==t){a[e].splice(n,1)}}},subscribe:function(e,t){e=(e||"").toString();if(!e){throw new TypeError("Channel not defined")}if(!c[e]){c[e]=[]}c[e].push(t)},publish:function(e,t){e=(e||"").toString();if(!e){throw new TypeError("Channel not defined")}A(e,t)},reInit:function(){m()}};v()})();
+
+    // jStorage/chrome.storage API wrapper
+    var storage = {
+      /**
+       * Get an item from storage
+       * @param key
+       * @param cb
+       */
+      get: function(key, cb){
+        cb($.jStorage.get(key));
+      },
+
+      /**
+       * Augment the storage with an object
+       * @param object
+       * @param [cb]
+       */
+      set: function(object, cb){
+        for (var prop in object) {
+          if( object.hasOwnProperty( prop ) ) {
+            $.jStorage.set(prop, object[prop]);
+          }
+        }
+        if(typeof cb == 'function') cb();
+      },
+
+      /**
+       * Add an item using a key to the storage
+       * @param key
+       * @param value
+       * @param [cb]
+       */
+      setKey: function(key, value, cb){
+        var o = {};
+        o[key] = value;
+        this.set(o, cb);
+      },
+
+      /**
+       * Remove an item with a given key from storage
+       * @param key
+       * @param [cb]
+       */
+      remove: function(key, cb){
+        $.jStorage.deleteKey(key);
+        if(typeof cb == 'function') cb();
+      }
+    };
+  }
+
 
   /**
    * Everything everyone outside this function will see.
@@ -115,21 +187,21 @@ var newMasjidTimes = function (config, my) {
    * @type {Object}
    */
   var events = {
-    ready: $.Callbacks(),       // Got prayer data and mosque data
-    prayer: $.Callbacks(),      // A prayer has passed
-    fajr: $.Callbacks(),        // Fajr has passed
-    shuruq: $.Callbacks(),      // Shuruq has passed
-    duhr: $.Callbacks(),        // Duhr has passed
-    asr: $.Callbacks(),         // Asr has passed
-    asr2: $.Callbacks(),        // Asr (hanafi) has passed
-    maghrib: $.Callbacks(),     // Maghrib has passed
-    isha: $.Callbacks(),        // Isha has passed
-    mosques: $.Callbacks(),     // Got nearest mosques
-    mosque: $.Callbacks(),      // Mosque has been chosen
-    prayertimes: $.Callbacks(), // Got prayer times
-    debug: $.Callbacks(),       // Event that is used for debugging what events got fired etc.
-    tick: $.Callbacks(),        // Time tick
-    day: $.Callbacks()          // We've just reached the end of the day.
+    ready: Callbacks(),       // Got prayer data and mosque data
+    prayer: Callbacks(),      // A prayer has passed
+    fajr: Callbacks(),        // Fajr has passed
+    shuruq: Callbacks(),      // Shuruq has passed
+    duhr: Callbacks(),        // Duhr has passed
+    asr: Callbacks(),         // Asr has passed
+    asr2: Callbacks(),        // Asr (hanafi) has passed
+    maghrib: Callbacks(),     // Maghrib has passed
+    isha: Callbacks(),        // Isha has passed
+    mosques: Callbacks(),     // Got nearest mosques
+    mosque: Callbacks(),      // Mosque has been chosen
+    prayertimes: Callbacks(), // Got prayer times
+    debug: Callbacks(),       // Event that is used for debugging what events got fired etc.
+    tick: Callbacks(),        // Time tick
+    day: Callbacks()          // We've just reached the end of the day.
   };
 
 
@@ -155,7 +227,7 @@ var newMasjidTimes = function (config, my) {
     var reqUrl = config.url + url;
     $.ajax({url: reqUrl, data: req, type: 'GET', cache: true, dataType: 'jsonp'}).done(function (responseData) {
       responseData = toJSON(responseData);
-      callback($.extend(responseData, {_request: req}));
+      callback(extend(responseData, {_request: req}));
     }).error(function (errorData) {
           if (errorCallback == undefined) {
             console.error({url: reqUrl, request:req, response: "AJAX Error: "+errorData.statusText+" ("+errorData.status+") : "+errorData.responseText});
@@ -215,7 +287,7 @@ var newMasjidTimes = function (config, my) {
    */
   var clearLocalStorage = function () {
     for (var k in l) {
-      if (l.hasOwnProperty(k)) $.jStorage.deleteKey(l[k]);
+      if (l.hasOwnProperty(k)) storage.remove(l[k]);
     }
   };
 
@@ -284,20 +356,22 @@ var newMasjidTimes = function (config, my) {
   on('mosque', function(mosque){
     // Someone has chosen a mosque.
     using.mosque = mosque;
-    $.jStorage.set(l.mosque, mosque);
 
-    if(!initialised){
-      checkInit();
-    }
+    storage.setKey(l.mosque, mosque, function(){
+      if(!initialised){
+        checkInit();
+      }
+    });
   });
 
   on('prayertimes', function(prayerTimes){
     // We have got the prayer times.
     using.prayer = prayerTimes;
-    $.jStorage.set(l.prayer, prayerTimes);
-    if(!initialised){
-      checkInit();
-    }
+    storage.setKey(l.prayer, prayerTimes, function(){
+      if(!initialised){
+        checkInit();
+      }
+    });
   });
 
   on('ready', function(){
@@ -347,14 +421,6 @@ var newMasjidTimes = function (config, my) {
   };
 
   /**
-   * Checks if we have enough data loaded that we can consider masjidTimes ready
-   * @returns {Boolean} True if masjidTimes is ready.
-   */
-  var isReady = function(){
-    return isStorageReady() && isUsingReady();
-  };
-
-  /**
    * Checks if masjidTimes has loaded stuff into memory yet
    * @returns {boolean} True if everything's loaded up
    */
@@ -364,26 +430,48 @@ var newMasjidTimes = function (config, my) {
 
   /**
    * Checks if everything that needs to be stored in local storage has been stored or not.
-   * @returns {boolean} True if everything's been stored.
    */
-  var isStorageReady = function(){
-    return $.jStorage.get(l.mosque) != undefined && $.jStorage.get(l.prayer) != undefined;
+  var isStorageReady = function(readyCB, notReadyCB){
+    storage.get(l.mosque, function(mosque){
+      storage.get(l.prayer, function(prayer){
+        if(mosque != undefined && prayer != undefined){
+          readyCB(mosque, prayer);
+        } else {
+          notReadyCB(mosque, prayer);
+        }
+      });
+    });
   };
 
   /**
    * Gets data from local storage and puts it into using.
    */
-  var loadFromStorage = function(){
-    using.mosque = $.jStorage.get(l.mosque);
-    using.prayer = $.jStorage.get(l.prayer);
+  var loadFromStorage = function(cb, mosque, prayer){
+    if(mosque!=undefined && prayer != undefined){
+      using.mosque = mosque;
+      using.prayer = prayer;
+      cb()
+    } else {
+      storage.get(l.mosque, function(mosque){
+        using.mosque = mosque;
+        storage.get(l.prayer, function(prayer){
+          using.prayer = prayer;
+          cb();
+        });
+      });
+    }
+
   };
 
   /**
    * Gets data from using and puts it into local storage.
    */
-  var putToStorage = function(){
-    $.jStorage.set(l.mosque, using.mosque);
-    $.jStorage.set(l.prayer, using.prayer);
+  var putToStorage = function(cb){
+    storage.setKey(l.mosque, using.mosque, function(){
+      storage.setKey(l.prayer, using.prayer, function(){
+        cb()
+      })
+    });
   };
 
 
@@ -391,38 +479,39 @@ var newMasjidTimes = function (config, my) {
     if(forced){
       clearLocalStorage();
     }
-    if(isReady()){
-      fire('ready');
-    } else if(isStorageReady() && !isUsingReady()){
-      // Case when there is stuff in storage but isn't loaded yet:
-      loadFromStorage();
-      fire('ready');
-    } else if(isUsingReady() && !isStorageReady()){
-      // Case when using is ready but we haven't stored it to local storage
-      putToStorage();
-      fire('ready');
-    } else{
-      // Case when nothing is ready.
-      // Here we need to request from server if we haven't already.
-      if(using.mosque == undefined && !triggeredMosqueSelection){
-        // We don't have a mosque chosen yet.
-        ajax.nearestMosques(using.coords, function(nearestMosques){
-          fire('mosques', nearestMosques);
-          triggeredMosqueSelection = true;
+    isStorageReady(function (mosque, prayer) {
+      // We have the stuff in storage!
+      loadFromStorage(function () {
+        fire('ready');
+      }, mosque, prayer);
+    }, function () {
+      // We don't have the stuff in storage!
+      if (isUsingReady()) {
+        // We have the stuff in memory!
+        putToStorage(function () {
+          fire('ready');
         });
+      } else {
+        // We don't have the stuff in memory!
+        // Nothing is ready.
+        // Here we need to request from server if we haven't already.
+        if (using.mosque == undefined && !triggeredMosqueSelection) {
+          // We don't have a mosque chosen yet.
+          ajax.nearestMosques(using.coords, function (nearestMosques) {
+            fire('mosques', nearestMosques);
+            triggeredMosqueSelection = true;
+          });
+        }
+        if (using.prayer == undefined && using.mosque != undefined) {
+          // TODO: Match the mosque's prayer times id with the using.prayer id in this if check
+          // We have a mosque chosen but don't have its prayer times yet.
+          ajax.prayerTimesById({id: using.mosque.prayertimes_id}, function (prayerTimes) {
+            fire('prayertimes', prayerTimes);
+          });
+        }
       }
-
-      if(using.prayer == undefined && using.mosque != undefined){
-        // TODO: Match the mosque's prayer times id with the using.prayer id in this if check
-        // We have a mosque chosen but don't have its prayer times yet.
-        ajax.prayerTimesById({id: using.mosque.prayertimes_id}, function(prayerTimes){
-          fire('prayertimes', prayerTimes);
-        });
-      }
-    }
+    });
   };
-
-
   /**
    * Loads stuff from local storage. If forced, then does a new request.
    * @param {{longitude:Number, latitude:Number}} [coords] The user's location
@@ -432,20 +521,34 @@ var newMasjidTimes = function (config, my) {
   var init = function(coords, forced) {
     if(coords == undefined){
       // Check cache
-      var cachedCoords = $.jStorage.get(l.coords);
-      if(cachedCoords == undefined){
-        throw "MasjidTimes failed to initialised. Coordinates not defined";
-      } else{
-        // Set using to cache
-        using.coords = {lat: cachedCoords.latitude, long:cachedCoords.longitude};
-      }
+      storage.get(l.coords, function(cachedCoords){
+        if(cachedCoords == undefined){
+          throw "MasjidTimes failed to initialise. Coordinates not defined";
+        } else {
+          using.coords = {lat: cachedCoords.latitude, long:cachedCoords.longitude};
+          checkInit(forced);
+        }
+      });
     } else {
       // Set using to coords
       using.coords = {lat: coords.latitude, long:coords.longitude};
-      $.jStorage.set(l.coords,coords);
+      storage.setKey(l.coords, coords, function(){
+        checkInit(forced);
+      });
     }
-    checkInit(forced);
-    return that;
+  };
+
+  var initFromCoords = function(nonCachedCb, cachedCallback){
+    storage.get(l.coords, function(cachedCoords){
+      if(cachedCoords != undefined){
+        init(cachedCoords);
+        if(typeof cachedCallback == 'function') cachedCallback(cachedCoords);
+      } else {
+        nonCachedCb(function(coords){
+          init(coords);
+        });
+      }
+    });
   };
 
   /**
@@ -527,7 +630,7 @@ var newMasjidTimes = function (config, my) {
       }
 
       var nextPrayerTimes = times.getDay(nextPrayerDate);
-      $.each(prayers, function(index, prayer){
+      each(prayers, function(index, prayer){
         // For each prayer (e.g. 'fajr'), find out what that prayers difference is.
         var difference = (prayerDateTime = times.stringToDate(nextPrayerTimes[prayer], nextPrayerDateTime)) - (counter == 0 ? nextPrayerDateTime : getDate());
         if(difference > 0){
@@ -600,13 +703,11 @@ var newMasjidTimes = function (config, my) {
   that.times = times;
   that.prayers = prayers;
   that.ready = ready;
-  that.storageReady  = isStorageReady();
-  that.coordsCached = function(){return $.jStorage.get(l.coords) != undefined};
-
   that.ajax = ajax;
   that.clearLocalStorage = clearLocalStorage;
   that.useMosque = useMosque;
   that.init = init;
+  that.initFromCoords = initFromCoords;
   that.fire = fire;
   that.on = on;
 

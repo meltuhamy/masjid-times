@@ -143,17 +143,15 @@ $(document).ready(function(){
   });
 
   // Ask for location
-  if(!mt.coordsCached()){
+  mt.initFromCoords(function(cb){
     navigator.geolocation.getCurrentPosition(function(positionData){
-      mt.init(positionData.coords);
+      cb(positionData.coords);
     }, function(error){
       if(error.PERMISSION_DENIED){
         bootbox.alert("Turning off location services is currently not supported. Stay tuned for updates :)");
       }
     });
-  } else {
-    mt.init();
-  }
+  });
 
 });
 
