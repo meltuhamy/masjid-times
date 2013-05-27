@@ -56,7 +56,7 @@ var newMasjidTimes = function (config, my) {
        * @param cb
        */
       get: function(key, cb){
-        cb($.jStorage.get(key));
+        cb(jQuery.jStorage.get(key));
       },
 
       /**
@@ -67,7 +67,7 @@ var newMasjidTimes = function (config, my) {
       set: function(object, cb){
         for (var prop in object) {
           if( object.hasOwnProperty( prop ) ) {
-            $.jStorage.set(prop, object[prop]);
+            jQuery.jStorage.set(prop, object[prop]);
           }
         }
         if(typeof cb == 'function') cb();
@@ -91,7 +91,7 @@ var newMasjidTimes = function (config, my) {
        * @param [cb]
        */
       remove: function(key, cb){
-        $.jStorage.deleteKey(key);
+        jQuery.jStorage.deleteKey(key);
         if(typeof cb == 'function') cb();
       }
     };
@@ -140,7 +140,7 @@ var newMasjidTimes = function (config, my) {
       }
     } else if(options == 'forced'){
       date = new Date();
-    } else if($.type(options) == 'date'){
+    } else if(jQuery.type(options) == 'date'){
       date = new Date(options.getTime());
     } else {
       date = new Date(options);
@@ -233,7 +233,7 @@ var newMasjidTimes = function (config, my) {
   ajax.get = function (url, data, callback, errorCallback) {
     var req = prepareData(data);
     var reqUrl = config.url + url;
-    $.ajax({url: reqUrl, data: req, type: 'GET', cache: true, dataType: 'jsonp'}).done(function (responseData) {
+    jQuery.ajax({url: reqUrl, data: req, type: 'GET', cache: true, dataType: 'jsonp'}).done(function (responseData) {
       responseData = toJSON(responseData);
       callback(extend(responseData, {_request: req}));
     }).error(function (errorData) {
@@ -572,7 +572,7 @@ var newMasjidTimes = function (config, my) {
   times.getDay = function(date){
     date = getDate(date);
     // TODO: Create new version of grep which has indexing (e.g. skip a month if wrong month)
-    return $.grep(using.prayer, function(element, index){return element.month == date.month && element.day == date.day;})[0];
+    return jQuery.grep(using.prayer, function(element, index){return element.month == date.month && element.day == date.day;})[0];
   };
 
   /**
