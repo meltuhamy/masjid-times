@@ -1,8 +1,9 @@
 var mt;
-var masjidConfig = {url: window.location.origin+'/masjid/', debug: false};
-var usingTomorrow = false;
 
-
+/**
+ * Helper function to display prayer times into DOM
+ * @param mosque
+ */
 var populateTimes = function(mosque){
   //Update any mosque name place holders.
   $('.mosque-name').html(mosque.name);
@@ -16,6 +17,9 @@ var populateTimes = function(mosque){
   }
 };
 
+/**
+ * Helper function to register click listeners
+ */
 var doButtonListeners = function(){
   $('#settings-clearcache').click(function(){
     //Clear the cache and reload.
@@ -24,6 +28,10 @@ var doButtonListeners = function(){
   });
 };
 
+/**
+ * Helper function that gets called ever second by mt
+ * @param next
+ */
 var updateRemaining = function(next){
   next = next || mt.times.getNext();
   var text, title;
@@ -50,6 +58,10 @@ var updateRemaining = function(next){
 
 };
 
+/**
+ * Helper function that allows the user to select a mosque
+ * @param mosques
+ */
 var pickMosqueDialog = function(mosques){
   /*
   A mosque looks like this:
@@ -90,8 +102,11 @@ var pickMosqueDialog = function(mosques){
   });
 };
 
-// Sound Manager stuff
+/**
+ * Set up the sound manager.
+ */
 soundManager.setup({
+  preferFlash: false,
   url: 'swf/',
   flashVersion: 9, // optional: shiny features (default = 8)// optional: ignore Flash where possible, use 100% HTML5 mode
   // preferFlash: false,
@@ -107,6 +122,9 @@ soundManager.setup({
   }
 });
 
+/**
+ * Finally...
+ */
 $(document).ready(function(){
   // Button listeners
   doButtonListeners();

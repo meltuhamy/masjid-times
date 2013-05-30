@@ -30,10 +30,14 @@ var newMasjidTimes = function (config, my) {
   var each = (jQuery && jQuery.each)?jQuery.each:function(e,t,n){var r,i=0,s=e.length,o=isArraylike(e);if(n){if(o){for(;i<s;i++){r=t.apply(e[i],n);if(r===false){break}}}else{for(i in e){r=t.apply(e[i],n);if(r===false){break}}}}else{if(o){for(;i<s;i++){r=t.call(e[i],i,e[i]);if(r===false){break}}}else{for(i in e){r=t.call(e[i],i,e[i]);if(r===false){break}}}}return e};
 
 
+  var isset = function(i){
+    return ! ( i == undefined || i == null || (typeof(i) == "object" && function(){var n;for(n in i ){return false;}return true;}()) );
+  };
+
   // If there is a storage methods, check and augment, otherwise use our own
-  if(config.storage != undefined && config.storage.get != undefined && config.storage.set != undefined && config.storage.remove != undefined){
+  if(isset(config.storage) && isset(config.storage.get) && isset(config.storage.set) && isset(config.storage.remove)){
     // Use config's storage methods
-    if(config.storage.setKey == undefined){
+    if(!isset(config.storage.setKey)){
       // Augment it so that we can setKey
       config.storage.setKey = function(key, value, cb){
         var o = {};
@@ -41,9 +45,20 @@ var newMasjidTimes = function (config, my) {
         config.storage.set(o, cb);
       };
     }
+    if(!isset(config.storage.getKey)){
+      // Augment it so that we can setKey
+      config.storage.getKey = function(key, cb){
+        config.storage.get(key, function(value){
+          cb(value[key]);
+        });
+      };
+    }
+    var storage = config.storage;
   } else {
+
     // JSON
-    var JSON;if(!JSON){JSON={}}(function(){"use strict";function f(e){return e<10?"0"+e:e}function quote(e){escapable.lastIndex=0;return escapable.test(e)?'"'+e.replace(escapable,function(e){var t=meta[e];return typeof t==="string"?t:"\\u"+("0000"+e.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+e+'"'}function str(e,t){var n,r,i,s,o=gap,u,a=t[e];if(a&&typeof a==="object"&&typeof a.toJSON==="function"){a=a.toJSON(e)}if(typeof rep==="function"){a=rep.call(t,e,a)}switch(typeof a){case"string":return quote(a);case"number":return isFinite(a)?String(a):"null";case"boolean":case"null":return String(a);case"object":if(!a){return"null"}gap+=indent;u=[];if(Object.prototype.toString.apply(a)==="[object Array]"){s=a.length;for(n=0;n<s;n+=1){u[n]=str(n,a)||"null"}i=u.length===0?"[]":gap?"[\n"+gap+u.join(",\n"+gap)+"\n"+o+"]":"["+u.join(",")+"]";gap=o;return i}if(rep&&typeof rep==="object"){s=rep.length;for(n=0;n<s;n+=1){if(typeof rep[n]==="string"){r=rep[n];i=str(r,a);if(i){u.push(quote(r)+(gap?": ":":")+i)}}}}else{for(r in a){if(Object.prototype.hasOwnProperty.call(a,r)){i=str(r,a);if(i){u.push(quote(r)+(gap?": ":":")+i)}}}}i=u.length===0?"{}":gap?"{\n"+gap+u.join(",\n"+gap)+"\n"+o+"}":"{"+u.join(",")+"}";gap=o;return i}}if(typeof Date.prototype.toJSON!=="function"){Date.prototype.toJSON=function(e){return isFinite(this.valueOf())?this.getUTCFullYear()+"-"+f(this.getUTCMonth()+1)+"-"+f(this.getUTCDate())+"T"+f(this.getUTCHours())+":"+f(this.getUTCMinutes())+":"+f(this.getUTCSeconds())+"Z":null};String.prototype.toJSON=Number.prototype.toJSON=Boolean.prototype.toJSON=function(e){return this.valueOf()}}var cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,escapable=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,gap,indent,meta={"\b":"\\b","	":"\\t","\n":"\\n","\f":"\\f","\r":"\\r",'"':'\\"',"\\":"\\\\"},rep;if(typeof JSON.stringify!=="function"){JSON.stringify=function(e,t,n){var r;gap="";indent="";if(typeof n==="number"){for(r=0;r<n;r+=1){indent+=" "}}else if(typeof n==="string"){indent=n}rep=t;if(t&&typeof t!=="function"&&(typeof t!=="object"||typeof t.length!=="number")){throw new Error("JSON.stringify")}return str("",{"":e})}}if(typeof JSON.parse!=="function"){JSON.parse=function(text,reviver){function walk(e,t){var n,r,i=e[t];if(i&&typeof i==="object"){for(n in i){if(Object.prototype.hasOwnProperty.call(i,n)){r=walk(i,n);if(r!==undefined){i[n]=r}else{delete i[n]}}}}return reviver.call(e,t,i)}var j;text=String(text);cx.lastIndex=0;if(cx.test(text)){text=text.replace(cx,function(e){return"\\u"+("0000"+e.charCodeAt(0).toString(16)).slice(-4)})}if(/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,"@").replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,"]").replace(/(?:^|:|,)(?:\s*\[)+/g,""))){j=eval("("+text+")");return typeof reviver==="function"?walk({"":j},""):j}throw new SyntaxError("JSON.parse")}}})();
+    if(!JSON){JSON={}}(function(){"use strict";function f(e){return e<10?"0"+e:e}function quote(e){escapable.lastIndex=0;return escapable.test(e)?'"'+e.replace(escapable,function(e){var t=meta[e];return typeof t==="string"?t:"\\u"+("0000"+e.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+e+'"'}function str(e,t){var n,r,i,s,o=gap,u,a=t[e];if(a&&typeof a==="object"&&typeof a.toJSON==="function"){a=a.toJSON(e)}if(typeof rep==="function"){a=rep.call(t,e,a)}switch(typeof a){case"string":return quote(a);case"number":return isFinite(a)?String(a):"null";case"boolean":case"null":return String(a);case"object":if(!a){return"null"}gap+=indent;u=[];if(Object.prototype.toString.apply(a)==="[object Array]"){s=a.length;for(n=0;n<s;n+=1){u[n]=str(n,a)||"null"}i=u.length===0?"[]":gap?"[\n"+gap+u.join(",\n"+gap)+"\n"+o+"]":"["+u.join(",")+"]";gap=o;return i}if(rep&&typeof rep==="object"){s=rep.length;for(n=0;n<s;n+=1){if(typeof rep[n]==="string"){r=rep[n];i=str(r,a);if(i){u.push(quote(r)+(gap?": ":":")+i)}}}}else{for(r in a){if(Object.prototype.hasOwnProperty.call(a,r)){i=str(r,a);if(i){u.push(quote(r)+(gap?": ":":")+i)}}}}i=u.length===0?"{}":gap?"{\n"+gap+u.join(",\n"+gap)+"\n"+o+"}":"{"+u.join(",")+"}";gap=o;return i}}if(typeof Date.prototype.toJSON!=="function"){Date.prototype.toJSON=function(e){return isFinite(this.valueOf())?this.getUTCFullYear()+"-"+f(this.getUTCMonth()+1)+"-"+f(this.getUTCDate())+"T"+f(this.getUTCHours())+":"+f(this.getUTCMinutes())+":"+f(this.getUTCSeconds())+"Z":null};String.prototype.toJSON=Number.prototype.toJSON=Boolean.prototype.toJSON=function(e){return this.valueOf()}}var cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,escapable=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,gap,indent,meta={"\b":"\\b","	":"\\t","\n":"\\n","\f":"\\f","\r":"\\r",'"':'\\"',"\\":"\\\\"},rep;if(typeof JSON.stringify!=="function"){JSON.stringify=function(e,t,n){var r;gap="";indent="";if(typeof n==="number"){for(r=0;r<n;r+=1){indent+=" "}}else if(typeof n==="string"){indent=n}rep=t;if(t&&typeof t!=="function"&&(typeof t!=="object"||typeof t.length!=="number")){throw new Error("JSON.stringify")}return str("",{"":e})}}if(typeof JSON.parse!=="function"){JSON.parse=function(text,reviver){function walk(e,t){var n,r,i=e[t];if(i&&typeof i==="object"){for(n in i){if(Object.prototype.hasOwnProperty.call(i,n)){r=walk(i,n);if(r!==undefined){i[n]=r}else{delete i[n]}}}}return reviver.call(e,t,i)}var j;text=String(text);cx.lastIndex=0;if(cx.test(text)){text=text.replace(cx,function(e){return"\\u"+("0000"+e.charCodeAt(0).toString(16)).slice(-4)})}if(/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,"@").replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,"]").replace(/(?:^|:|,)(?:\s*\[)+/g,""))){j=eval("("+text+")");return typeof reviver==="function"?walk({"":j},""):j}throw new SyntaxError("JSON.parse")}}})();
+
 
     // jStorage
     if(!(jQuery&&jQuery.jStorage))(function(){function v(){var e=false;if("localStorage"in window){try{window.localStorage.setItem("_tmptest","tmpval");e=true;window.localStorage.removeItem("_tmptest")}catch(t){}}if(e){try{if(window.localStorage){i=window.localStorage;u="localStorage";l=i.jStorage_update}}catch(n){}}else if("globalStorage"in window){try{if(window.globalStorage){i=window.globalStorage[window.location.hostname];u="globalStorage";l=i.jStorage_update}}catch(r){}}else{s=document.createElement("link");if(s.addBehavior){s.style.behavior="url(#default#userData)";document.getElementsByTagName("head")[0].appendChild(s);try{s.load("jStorage")}catch(o){s.setAttribute("jStorage","{}");s.save("jStorage");s.load("jStorage")}var a="{}";try{a=s.getAttribute("jStorage")}catch(f){}try{l=s.getAttribute("jStorage_update")}catch(c){}i.jStorage=a;u="userDataBehavior"}else{s=null;return}}S();N();g();C();if("addEventListener"in window){window.addEventListener("pageshow",function(e){if(e.persisted){y()}},false)}}function m(){var e="{}";if(u=="userDataBehavior"){s.load("jStorage");try{e=s.getAttribute("jStorage")}catch(t){}try{l=s.getAttribute("jStorage_update")}catch(n){}i.jStorage=e}S();N();C()}function g(){if(u=="localStorage"||u=="globalStorage"){if("addEventListener"in window){window.addEventListener("storage",y,false)}else{document.attachEvent("onstorage",y)}}else if(u=="userDataBehavior"){setInterval(y,1e3)}}function y(){var e;clearTimeout(f);f=setTimeout(function(){if(u=="localStorage"||u=="globalStorage"){e=i.jStorage_update}else if(u=="userDataBehavior"){s.load("jStorage");try{e=s.getAttribute("jStorage_update")}catch(t){}}if(e&&e!=l){l=e;b()}},25)}function b(){var e=n.parse(n.stringify(r.__jstorage_meta.CRC32)),t;m();t=n.parse(n.stringify(r.__jstorage_meta.CRC32));var i,s=[],o=[];for(i in e){if(e.hasOwnProperty(i)){if(!t[i]){o.push(i);continue}if(e[i]!=t[i]&&String(e[i]).substr(0,2)=="2."){s.push(i)}}}for(i in t){if(t.hasOwnProperty(i)){if(!e[i]){s.push(i)}}}w(s,"updated");w(o,"deleted")}function w(e,t){e=[].concat(e||[]);if(t=="flushed"){e=[];for(var n in a){if(a.hasOwnProperty(n)){e.push(n)}}t="deleted"}for(var r=0,i=e.length;r<i;r++){if(a[e[r]]){for(var s=0,o=a[e[r]].length;s<o;s++){a[e[r]][s](e[r],t)}}if(a["*"]){for(var s=0,o=a["*"].length;s<o;s++){a["*"][s](e[r],t)}}}}function E(){var e=(+(new Date)).toString();if(u=="localStorage"||u=="globalStorage"){i.jStorage_update=e}else if(u=="userDataBehavior"){s.setAttribute("jStorage_update",e);s.save("jStorage")}y()}function S(){if(i.jStorage){try{r=n.parse(String(i.jStorage))}catch(e){i.jStorage="{}"}}else{i.jStorage="{}"}o=i.jStorage?String(i.jStorage).length:0;if(!r.__jstorage_meta){r.__jstorage_meta={}}if(!r.__jstorage_meta.CRC32){r.__jstorage_meta.CRC32={}}}function x(){L();try{i.jStorage=n.stringify(r);if(s){s.setAttribute("jStorage",i.jStorage);s.save("jStorage")}o=i.jStorage?String(i.jStorage).length:0}catch(e){}}function T(e){if(!e||typeof e!="string"&&typeof e!="number"){throw new TypeError("Key name must be string or numeric")}if(e=="__jstorage_meta"){throw new TypeError("Reserved key name")}return true}function N(){var e,t,n,i,s=Infinity,o=false,u=[];clearTimeout(p);if(!r.__jstorage_meta||typeof r.__jstorage_meta.TTL!="object"){return}e=+(new Date);n=r.__jstorage_meta.TTL;i=r.__jstorage_meta.CRC32;for(t in n){if(n.hasOwnProperty(t)){if(n[t]<=e){delete n[t];delete i[t];delete r[t];o=true;u.push(t)}else if(n[t]<s){s=n[t]}}}if(s!=Infinity){p=setTimeout(N,s-e)}if(o){x();E();w(u,"deleted")}}function C(){var e,t;if(!r.__jstorage_meta.PubSub){return}var n,i=h;for(e=t=r.__jstorage_meta.PubSub.length-1;e>=0;e--){n=r.__jstorage_meta.PubSub[e];if(n[0]>h){i=n[0];k(n[1],n[2])}}h=i}function k(e,t){if(c[e]){for(var r=0,i=c[e].length;r<i;r++){c[e][r](e,n.parse(n.stringify(t)))}}}function L(){if(!r.__jstorage_meta.PubSub){return}var e=+(new Date)-2e3;for(var t=0,n=r.__jstorage_meta.PubSub.length;t<n;t++){if(r.__jstorage_meta.PubSub[t][0]<=e){r.__jstorage_meta.PubSub.splice(t,r.__jstorage_meta.PubSub.length-t);break}}if(!r.__jstorage_meta.PubSub.length){delete r.__jstorage_meta.PubSub}}function A(e,t){if(!r.__jstorage_meta){r.__jstorage_meta={}}if(!r.__jstorage_meta.PubSub){r.__jstorage_meta.PubSub=[]}r.__jstorage_meta.PubSub.unshift([+(new Date),e,t]);x();E()}function O(e,t){var n=e.length,r=t^n,i=0,s;while(n>=4){s=e.charCodeAt(i)&255|(e.charCodeAt(++i)&255)<<8|(e.charCodeAt(++i)&255)<<16|(e.charCodeAt(++i)&255)<<24;s=(s&65535)*1540483477+(((s>>>16)*1540483477&65535)<<16);s^=s>>>24;s=(s&65535)*1540483477+(((s>>>16)*1540483477&65535)<<16);r=(r&65535)*1540483477+(((r>>>16)*1540483477&65535)<<16)^s;n-=4;++i}switch(n){case 3:r^=(e.charCodeAt(i+2)&255)<<16;case 2:r^=(e.charCodeAt(i+1)&255)<<8;case 1:r^=e.charCodeAt(i)&255;r=(r&65535)*1540483477+(((r>>>16)*1540483477&65535)<<16)}r^=r>>>13;r=(r&65535)*1540483477+(((r>>>16)*1540483477&65535)<<16);r^=r>>>15;return r>>>0}var e="0.4.3",t=window.jQuery||window.$||(window.$={}),n={parse:window.JSON&&(window.JSON.parse||window.JSON.decode)||String.prototype.evalJSON&&function(e){return String(e).evalJSON()}||t.parseJSON||t.evalJSON,stringify:Object.toJSON||window.JSON&&(window.JSON.stringify||window.JSON.encode)||t.toJSON};if(!n.parse||!n.stringify){throw new Error("No JSON support found, include //cdnjs.cloudflare.com/ajax/libs/json2/20110223/json2.js to page")}var r={__jstorage_meta:{CRC32:{}}},i={jStorage:"{}"},s=null,o=0,u=false,a={},f=false,l=0,c={},h=+(new Date),p,d={isXML:function(e){var t=(e?e.ownerDocument||e:0).documentElement;return t?t.nodeName!=="HTML":false},encode:function(e){if(!this.isXML(e)){return false}try{return(new XMLSerializer).serializeToString(e)}catch(t){try{return e.xml}catch(n){}}return false},decode:function(e){var t="DOMParser"in window&&(new DOMParser).parseFromString||window.ActiveXObject&&function(e){var t=new ActiveXObject("Microsoft.XMLDOM");t.async="false";t.loadXML(e);return t},n;if(!t){return false}n=t.call("DOMParser"in window&&new DOMParser||window,e,"text/xml");return this.isXML(n)?n:false}};t.jStorage={version:e,set:function(e,t,i){T(e);i=i||{};if(typeof t=="undefined"){this.deleteKey(e);return t}if(d.isXML(t)){t={_is_xml:true,xml:d.encode(t)}}else if(typeof t=="function"){return undefined}else if(t&&typeof t=="object"){t=n.parse(n.stringify(t))}r[e]=t;r.__jstorage_meta.CRC32[e]="2."+O(n.stringify(t),2538058380);this.setTTL(e,i.TTL||0);w(e,"updated");return t},get:function(e,t){T(e);if(e in r){if(r[e]&&typeof r[e]=="object"&&r[e]._is_xml){return d.decode(r[e].xml)}else{return r[e]}}return typeof t=="undefined"?null:t},deleteKey:function(e){T(e);if(e in r){delete r[e];if(typeof r.__jstorage_meta.TTL=="object"&&e in r.__jstorage_meta.TTL){delete r.__jstorage_meta.TTL[e]}delete r.__jstorage_meta.CRC32[e];x();E();w(e,"deleted");return true}return false},setTTL:function(e,t){var n=+(new Date);T(e);t=Number(t)||0;if(e in r){if(!r.__jstorage_meta.TTL){r.__jstorage_meta.TTL={}}if(t>0){r.__jstorage_meta.TTL[e]=n+t}else{delete r.__jstorage_meta.TTL[e]}x();N();E();return true}return false},getTTL:function(e){var t=+(new Date),n;T(e);if(e in r&&r.__jstorage_meta.TTL&&r.__jstorage_meta.TTL[e]){n=r.__jstorage_meta.TTL[e]-t;return n||0}return 0},flush:function(){r={__jstorage_meta:{CRC32:{}}};x();E();w(null,"flushed");return true},storageObj:function(){function e(){}e.prototype=r;return new e},index:function(){var e=[],t;for(t in r){if(r.hasOwnProperty(t)&&t!="__jstorage_meta"){e.push(t)}}return e},storageSize:function(){return o},currentBackend:function(){return u},storageAvailable:function(){return!!u},listenKeyChange:function(e,t){T(e);if(!a[e]){a[e]=[]}a[e].push(t)},stopListening:function(e,t){T(e);if(!a[e]){return}if(!t){delete a[e];return}for(var n=a[e].length-1;n>=0;n--){if(a[e][n]==t){a[e].splice(n,1)}}},subscribe:function(e,t){e=(e||"").toString();if(!e){throw new TypeError("Channel not defined")}if(!c[e]){c[e]=[]}c[e].push(t)},publish:function(e,t){e=(e||"").toString();if(!e){throw new TypeError("Channel not defined")}A(e,t)},reInit:function(){m()}};v()})();
@@ -56,7 +71,15 @@ var newMasjidTimes = function (config, my) {
        * @param cb
        */
       get: function(key, cb){
-        cb(jQuery.jStorage.get(key));
+        var o = {};
+        o[key] = jQuery.jStorage.get(key);
+        cb(o);
+      },
+
+      getKey: function(key, cb){
+        this.get(key, function(value){
+          cb(value[key]);
+        });
       },
 
       /**
@@ -132,8 +155,8 @@ var newMasjidTimes = function (config, my) {
    */
   var getDate = function(options){
     var date;
-    if(options == undefined){
-      if(times.tick == undefined){
+    if(!isset(options)){
+      if(!isset(times.tick)){
         date = new Date();
       } else {
         date = times.tick;
@@ -233,11 +256,17 @@ var newMasjidTimes = function (config, my) {
   ajax.get = function (url, data, callback, errorCallback) {
     var req = prepareData(data);
     var reqUrl = config.url + url;
-    jQuery.ajax({url: reqUrl, data: req, type: 'GET', cache: true, dataType: 'jsonp'}).done(function (responseData) {
+
+    var success = function(responseData){
       responseData = toJSON(responseData);
       callback(extend(responseData, {_request: req}));
-    }).error(function (errorData) {
-          if (errorCallback == undefined) {
+    };
+
+    jQuery.ajax({url: reqUrl, data: req, type: 'GET', cache: true, dataType: 'blob'}).done(success).error(function (errorData) {
+          if(errorData.status == 200){
+            // This isn't actually an error!
+            success(toJSON(errorData.responseText));
+          } else if (!isset(errorCallback)) {
             console.error({url: reqUrl, request:req, response: "AJAX Error: "+errorData.statusText+" ("+errorData.status+") : "+errorData.responseText});
           } else {
             errorCallback(errorData);
@@ -390,7 +419,7 @@ var newMasjidTimes = function (config, my) {
 
   on('tick', function(nextTimes){
     var newTick = getDate('forced');
-    if(times.tick != undefined && (times.tick.day != newTick.day || times.tick.month != newTick.month)){
+    if(isset(times.tick) && (times.tick.day != newTick.day || times.tick.month != newTick.month)){
       // We're on a different day than before.
       fire('day', times.getDay(newTick));
     }
@@ -433,16 +462,16 @@ var newMasjidTimes = function (config, my) {
    * @returns {boolean} True if everything's loaded up
    */
   var isUsingReady = function(){
-    return using != undefined && using.mosque != undefined && using.prayer != undefined;
+    return isset(using) && isset(using.mosque) && isset(using.prayer);
   };
 
   /**
    * Checks if everything that needs to be stored in local storage has been stored or not.
    */
   var isStorageReady = function(readyCB, notReadyCB){
-    storage.get(l.mosque, function(mosque){
-      storage.get(l.prayer, function(prayer){
-        if(mosque != undefined && prayer != undefined){
+    storage.getKey(l.mosque, function(mosque){
+      storage.getKey(l.prayer, function(prayer){
+        if(isset(mosque) && isset(prayer)){
           readyCB(mosque, prayer);
         } else {
           notReadyCB(mosque, prayer);
@@ -455,14 +484,14 @@ var newMasjidTimes = function (config, my) {
    * Gets data from local storage and puts it into using.
    */
   var loadFromStorage = function(cb, mosque, prayer){
-    if(mosque!=undefined && prayer != undefined){
+    if(isset(mosque) && isset(prayer)){
       using.mosque = mosque;
       using.prayer = prayer;
       cb()
     } else {
-      storage.get(l.mosque, function(mosque){
+      storage.getKey(l.mosque, function(mosque){
         using.mosque = mosque;
-        storage.get(l.prayer, function(prayer){
+        storage.getKey(l.prayer, function(prayer){
           using.prayer = prayer;
           cb();
         });
@@ -503,14 +532,14 @@ var newMasjidTimes = function (config, my) {
         // We don't have the stuff in memory!
         // Nothing is ready.
         // Here we need to request from server if we haven't already.
-        if (using.mosque == undefined && !triggeredMosqueSelection) {
+        if (!isset(using.mosque) && !triggeredMosqueSelection) {
           // We don't have a mosque chosen yet.
           ajax.nearestMosques(using.coords, function (nearestMosques) {
             fire('mosques', nearestMosques);
             triggeredMosqueSelection = true;
           });
         }
-        if (using.prayer == undefined && using.mosque != undefined) {
+        if (!isset(using.prayer) && isset(using.mosque)) {
           // TODO: Match the mosque's prayer times id with the using.prayer id in this if check
           // We have a mosque chosen but don't have its prayer times yet.
           ajax.prayerTimesById({id: using.mosque.prayertimes_id}, function (prayerTimes) {
@@ -527,28 +556,28 @@ var newMasjidTimes = function (config, my) {
    * @returns {Object}
    */
   var init = function(coords, forced) {
-    if(coords == undefined){
+    if(!isset(coords)){
       // Check cache
-      storage.get(l.coords, function(cachedCoords){
-        if(cachedCoords == undefined){
+      storage.getKey(l.coords, function(cachedCoords){
+        if(!isset(cachedCoords)){
           throw "MasjidTimes failed to initialise. Coordinates not defined";
         } else {
-          using.coords = {lat: cachedCoords.latitude, long:cachedCoords.longitude};
+          using.coords = cachedCoords;
           checkInit(forced);
         }
       });
     } else {
       // Set using to coords
       using.coords = {lat: coords.latitude, long:coords.longitude};
-      storage.setKey(l.coords, coords, function(){
+      storage.setKey(l.coords, using.coords, function(){
         checkInit(forced);
       });
     }
   };
 
   var initFromCoords = function(nonCachedCb, cachedCallback){
-    storage.get(l.coords, function(cachedCoords){
-      if(cachedCoords != undefined){
+    storage.getKey(l.coords, function(cachedCoords){
+      if(isset(cachedCoords)){
         init(cachedCoords);
         if(typeof cachedCallback == 'function') cachedCallback(cachedCoords);
       } else {
@@ -583,7 +612,7 @@ var newMasjidTimes = function (config, my) {
     if(initialised){
       // Search the prayer times for todays date.
       var realToday = getDate();
-      if(times.today !== undefined && realToday.day == times.today.day && realToday.month == times.today.month){
+      if(isset(times.today) && realToday.day == times.today.day && realToday.month == times.today.month){
         //console.debug("Cache hit");
         return times.today;
       } else {
@@ -618,7 +647,7 @@ var newMasjidTimes = function (config, my) {
 
     // Cache check
     var now = getDate();
-    if(times.next != undefined && times.next.date > now){
+    if(isset(times.next) && times.next.date > now){
       // Cache hit; now just change remaining time.
       times.next.remaining = times.next.date - now;
       return times.next;
@@ -627,7 +656,7 @@ var newMasjidTimes = function (config, my) {
     var nextPrayer, nextPrayerDifference, nextPrayerDate, prayerDateTime = undefined;
     var counter = 0;
 
-    while(nextPrayer == undefined){
+    while(!isset(nextPrayer)){
       // The next date to check:
       // Get the prayer times for the date of (today's date + counter * 1 day)
       // The nextPrayerDate is normalised, meaning that hours, minutes, seconds are 0.
