@@ -1,1 +1,1 @@
-var masjidConfig = {url: window.location.origin+'/masjid/', debug: false};
+var masjidConfig = {url: window.location.protocol + "//" + window.location.host+'/masjid/', debug: false};

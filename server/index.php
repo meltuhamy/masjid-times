@@ -216,7 +216,7 @@ $app->get('/mosque/', function () use ($app) {
     $long = $req->params('long');
 
     //Show all mosques by default
-    $sql = "SELECT * FROM mosque";
+    $sql = "SELECT mosque.*, '0' as distance FROM mosque";
     $sqlParams = array();
 
     if (isset($lat, $long)) {
