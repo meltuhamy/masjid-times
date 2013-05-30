@@ -162,13 +162,25 @@ $(document).ready(function(){
 
   // Ask for location
   mt.initFromCoords(function(cb){
+    $('#nextprayercounter').html("This isn't si7r. We're calculating your location...")
     navigator.geolocation.getCurrentPosition(function(positionData){
       cb(positionData.coords);
     }, function(error){
-      if(error.PERMISSION_DENIED){
-        bootbox.alert("Turning off location services is currently not supported. Stay tuned for updates :)");
+      var doThisWhenError = function () {
+        mt.initFromNothing();
+      };
+      switch(error.code){
+        case error.PERMISSION_DENIED:
+          bootbox.alert("Y u decline position ya3ni? <br /><br />We'll let you choose from the list of ALL mosques we have available.", doThisWhenError);
+          break;
+        case error.POSITION_UNAVAILABLE:
+          bootbox.alert("It looks like we can't find your position! Maybe you're in the sahara desert or, ya3ni, your browser not very good. <br /><br />We'll let you choose from the list of ALL mosques we have available.", doThisWhenError);
+          break;
+        case error.TIMEOUT:
+          bootbox.alert("It's taking longer than expected to figure out your position. Either your browser is lazy or, ya3ni, there's something wrong. <br /><br />We'll let you choose from the list of ALL mosques we have available.", doThisWhenError);
+          break;
       }
-    });
+    }, {timeout: 5000});
   });
 
 });

@@ -276,7 +276,7 @@ var newMasjidTimes = function (config, my) {
 
   /**
    * Requests array of nearest mosques
-   * @param {{lat:Number, lng:Number, [range]:Number}} options The options of the function.
+   * @param {{lat:Number, lng:Number, [range]:Number}}|undefined options The options of the function.
    * @param {Function} callback Function called once request completed
    */
   ajax.nearestMosques = function (options, callback) {
@@ -342,12 +342,14 @@ var newMasjidTimes = function (config, my) {
    * Augments the data with metadata.
    * The metadata right now is just debug info, but it could also be
    * other stuff like authentication if we want to.
-   * @param  {Object} data The data we are going to send
+   * @param  {Object|undefined} data The data we are going to send
    * @return {Object}      The date we are going to send, augmented with metadata.
    */
   var prepareData = function (data) {
-    data.debug = config.debug ? '1' : undefined;
-    data.next = config.debug ? 'isha' : undefined;
+    if(isset(data)){
+      data.debug = config.debug ? '1' : undefined;
+      data.next = config.debug ? 'isha' : undefined;
+    }
     return data;
   };
 
@@ -588,6 +590,13 @@ var newMasjidTimes = function (config, my) {
     });
   };
 
+  var initFromNothing = function(){
+    ajax.nearestMosques(undefined, function (nearestMosques) {
+      fire('mosques', nearestMosques);
+      triggeredMosqueSelection = true;
+    });
+  };
+
   /**
    * A set of properties and methods to do with prayer times.
    * @type {{getDay, getToday, today, getNext, getDifference, stringToHoursMinutes, stringToDate, prayerPassed}}
@@ -745,6 +754,7 @@ var newMasjidTimes = function (config, my) {
   that.useMosque = useMosque;
   that.init = init;
   that.initFromCoords = initFromCoords;
+  that.initFromNothing = initFromNothing;
   that.fire = fire;
   that.on = on;
 

@@ -215,18 +215,22 @@ $app->get('/mosque/', function () use ($app) {
     $lat = $req->params('lat');
     $long = $req->params('long');
 
-    if (!isset($lat, $long)) {
-      json_error($app, 'Lat and Long must be set');
-      return;
+    //Show all mosques by default
+    $sql = "SELECT * FROM mosque";
+    $sqlParams = array();
+
+    if (isset($lat, $long)) {
+      $maxRange = 25000;
+      $defaultRange = 1000;
+      $reqRange = $req->params('range');
+      $range = isset($reqRange) && $reqRange < $maxRange && $reqRange > 0 ? $reqRange : $defaultRange;
+
+      $sql = 'SELECT *, SQRT(POW(69.1 * (`lat` - ?), 2) + POW(69.1 * (? - `long`) * COS(`lat` / 57.3), 2)) AS distance FROM mosque HAVING distance < ? ORDER BY distance';
+      $sqlParams = array($lat, $long, $range);
     }
 
-    $maxRange = 25000;
-    $defaultRange = 1000;
-    $reqRange = $req->params('range');
-    $range = isset($reqRange) && $reqRange < $maxRange && $reqRange > 0 ? $reqRange : $defaultRange;
-
-    $stmt = $app->db->prepare('SELECT *, SQRT(POW(69.1 * (`lat` - ?), 2) + POW(69.1 * (? - `long`) * COS(`lat` / 57.3), 2)) AS distance FROM mosque HAVING distance < ? ORDER BY distance');
-    $stmt->execute(array($lat, $long, $range));
+    $stmt = $app->db->prepare($sql);
+    $stmt->execute($sqlParams);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
   } catch (PDOException $ex) {
