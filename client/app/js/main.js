@@ -1,5 +1,4 @@
 var mt;
-
 /**
  * Helper function to display prayer times into DOM
  * @param mosque
