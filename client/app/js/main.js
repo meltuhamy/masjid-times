@@ -161,8 +161,10 @@ $(document).ready(function(){
 
   // Ask for location
   mt.initFromCoords(function(cb){
-    $('#nextprayercounter').html("This isn't si7r. We're calculating your location...")
+    $('#nextprayercounter').html("This isn't si7r. We're calculating your location...");
+    console.debug("getCurrentPosition called.");
     navigator.geolocation.getCurrentPosition(function(positionData){
+      console.debug("Received current position: ", positionData);
       cb(positionData.coords);
     }, function(error){
       var doThisWhenError = function () {

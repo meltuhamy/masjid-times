@@ -42,13 +42,17 @@ var newMasjidTimes = function (config, my) {
       config.storage.setKey = function(key, value, cb){
         var o = {};
         o[key] = value;
-        config.storage.set(o, cb);
+        config.storage.set(o, function(){
+          console.debug('SET: ', o);
+          if(typeof cb === 'function') cb();
+        });
       };
     }
     if(!isset(config.storage.getKey)){
       // Augment it so that we can setKey
       config.storage.getKey = function(key, cb){
         config.storage.get(key, function(value){
+          console.debug("GET: ", value);
           cb(value[key]);
         });
       };
@@ -79,6 +83,8 @@ var newMasjidTimes = function (config, my) {
       getKey: function(key, cb){
         this.get(key, function(value){
           cb(value[key]);
+          console.debug("GET: ", value);
+
         });
       },
 
@@ -105,6 +111,7 @@ var newMasjidTimes = function (config, my) {
       setKey: function(key, value, cb){
         var o = {};
         o[key] = value;
+        console.debug('SET: ', o);
         this.set(o, cb);
       },
 
@@ -115,6 +122,11 @@ var newMasjidTimes = function (config, my) {
        */
       remove: function(key, cb){
         jQuery.jStorage.deleteKey(key);
+        if(typeof cb == 'function') cb();
+      },
+
+      clear: function(cb){
+        jQuery.jStorage.flush();
         if(typeof cb == 'function') cb();
       }
     };
@@ -323,9 +335,7 @@ var newMasjidTimes = function (config, my) {
    * Clears all local storage stored by masjidTimes
    */
   var clearLocalStorage = function () {
-    for (var k in l) {
-      if (l.hasOwnProperty(k)) storage.remove(l[k]);
-    }
+    storage.clear();
   };
 
 
@@ -564,14 +574,14 @@ var newMasjidTimes = function (config, my) {
         if(!isset(cachedCoords)){
           throw "MasjidTimes failed to initialise. Coordinates not defined";
         } else {
-          using.coords = cachedCoords;
+          using.coords = {lat: cachedCoords.latitude, long:cachedCoords.longitude};
           checkInit(forced);
         }
       });
     } else {
       // Set using to coords
       using.coords = {lat: coords.latitude, long:coords.longitude};
-      storage.setKey(l.coords, using.coords, function(){
+      storage.setKey(l.coords, {latitude: coords.latitude, longitude: coords.longitude}, function(){
         checkInit(forced);
       });
     }
@@ -580,11 +590,13 @@ var newMasjidTimes = function (config, my) {
   var initFromCoords = function(nonCachedCb, cachedCallback){
     storage.getKey(l.coords, function(cachedCoords){
       if(isset(cachedCoords)){
-        init(cachedCoords);
+        init();
         if(typeof cachedCallback == 'function') cachedCallback(cachedCoords);
       } else {
         nonCachedCb(function(coords){
-          init(coords);
+          storage.setKey(l.coords, {latitude: coords.latitude, longitude: coords.longitude}, function(){
+            init();
+          });
         });
       }
     });
