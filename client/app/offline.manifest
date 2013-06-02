@@ -32,3 +32,6 @@ lib/angular/angular-sanitize.min.js
 partials/about.html
 partials/home.html
 index.html
+
+NETWORK:
+/masjid/
