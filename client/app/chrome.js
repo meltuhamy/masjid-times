@@ -4,6 +4,8 @@
  * @see http://developer.chrome.com/trunk/apps/app.runtime.html
  * @see http://developer.chrome.com/trunk/apps/app.window.html
  */
+
+var appWindow;
 chrome.app.runtime.onLaunched.addListener(function() {
   // Center window on screen.
   var screenWidth = screen.availWidth;
@@ -11,14 +13,21 @@ chrome.app.runtime.onLaunched.addListener(function() {
   var width = 780;
   var height = 600;
 
-  chrome.app.window.create('chrome.html', {
-    bounds: {
-      width: width,
-      height: height,
-      left: Math.round((screenWidth-width)/2),
-      top: Math.round((screenHeight-height)/2)
-    }
-  });
+  if(appWindow && appWindow.contentWindow && appWindow.contentWindow.window){
+    appWindow.show();
+    appWindow.focus();
+  } else {
+    chrome.app.window.create('chrome.html', {
+      bounds: {
+        width: width,
+        height: height,
+        left: Math.round((screenWidth-width)/2),
+        top: Math.round((screenHeight-height)/2)
+      }
+    }, function(newWindow){
+      appWindow = newWindow;
+    });
+  }
 });
 
 chrome.storage.onChanged.addListener(function(changes, namespace) {
