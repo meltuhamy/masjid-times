@@ -657,6 +657,29 @@ var newMasjidTimes = function (config, my) {
     }
   };
 
+  times.getYesterday = function(){
+    if(initialised){
+      return times.getDay(new Date(getDate().getTime() - 24 * 60 * 60 * 1000));
+    } else{
+      throw "MasjidTimes is not initialised.";
+    }
+  };
+
+  times.getPrevious = function(){
+    var previous = PRAYER[times.getNext().prayer]-1;
+    var prayer, date;
+    if(previous == -1){
+      prayer = 'isha';
+      date = times.stringToDate(times.getYesterday()[isha], new Date(getDate().getTime() - 24 * 60 * 60 * 1000));
+    } else {
+      prayer = prayers[previous];
+      date = times.stringToDate(times.getToday()[prayer]);
+    }
+
+    return {date: date, prayer: prayer};
+
+  };
+
   /**
    * Gets the next prayer from now.
    * Prayer could be the following day's fajr. Remaining is number of milliseconds till next prayer
@@ -752,6 +775,8 @@ var newMasjidTimes = function (config, my) {
   times.prayerPassed = function (prayer) {
     return getDate() >= times.stringToDate(today[prayer]);
   };
+
+
 
 
 

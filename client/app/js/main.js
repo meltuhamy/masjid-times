@@ -1,4 +1,63 @@
 var mt;
+var backgrounds;
+
+var fixBackgroundHeight = function(){
+  // Fix background height (very hacky :( )
+  $('#top-dashboard .background').height($('#top-dashboard').outerHeight());
+};
+
+var makeTransparent = function(prayer, opacity, animated){
+  opacity = opacity || 0.0;
+  var element = $.type(prayer) == 'string' ? '#top-dashboard #'+prayer+'-bg.background' : prayer;
+  if(animated){
+    $(element).animate({'opacity':opacity}, {
+      duration: 1000,
+      easing: 'swing'
+    });
+  } else {
+    $(element).css('opacity', opacity);
+  }
+};
+
+var makeOpaque = function(prayer, animated){
+  var element = $.type(prayer) == 'string' ? '#top-dashboard #'+prayer+'-bg.background' : prayer;
+
+  if(animated){
+    $(element).animate({'opacity':1.0}, {
+      duration: 1000,
+      easing: 'swing'
+    });
+  } else {
+    $(element).css('opacity',1.0);
+  }
+};
+
+var setBackgroundState = function(prayer, completeness){
+  // Set all opacity to 1 initially, then pop stack
+  var i;
+  for (i = 0; i < backgrounds.length; i++) {
+    var current = backgrounds[i];
+    if (current.prayer != prayer) {
+      if (backgrounds[i + 1] && backgrounds[i + 1].prayer == prayer && completeness != undefined) {
+        makeTransparent(current.element, 1 - completeness);
+      } else {
+        makeTransparent(current.element);
+      }
+    } else {
+      makeOpaque(current.element);
+      break;
+    }
+  }
+};
+
+var updateBackground = function(next, previous){
+  var nextDate = next.date, previousDate = previous.date, remaining = next.remaining;
+  var diff = nextDate - previousDate;
+  var percentDone = 1 - remaining/diff;
+  setBackgroundState(next.prayer, percentDone);
+
+};
+
 /**
  * Helper function to display prayer times into DOM
  * @param mosque
@@ -14,6 +73,9 @@ var populateTimes = function(mosque){
     $('.today .'+mt.prayers[i]+'-time').html(times[mt.prayers[i]]);
     $('.tomorrow .'+mt.prayers[i]+'-time').html(timesTomorrow[mt.prayers[i]]);
   }
+
+  fixBackgroundHeight();
+
 };
 
 /**
@@ -33,7 +95,8 @@ var doButtonListeners = function(){
  */
 var updateRemaining = function(next){
   next = next || mt.times.getNext();
-  var text, title;
+  var text, title, previous;
+  updateBackground(next, mt.times.getPrevious());
   if(next.remaining > 1000){
     var textArray = remaining.getArray(next.remaining/1000);
     textArray[0] = textArray[0] == undefined || textArray[0] == 0 ? '' : (textArray[0] == 1? textArray[0] + ' Hour' : textArray[0] + ' Hours' );
@@ -125,64 +188,6 @@ soundManager.setup({
  * Finally...
  */
 $(document).ready(function(){
-  // Button listeners
-  doButtonListeners();
-  mt = newMasjidTimes(masjidConfig);
-
-  // NOTE: Event handlers should be called first before init.
-
-  // Get the nearest mosques
-  mt.on('mosques', function(nearestMosques){
-    pickMosqueDialog(nearestMosques);
-  });
-
-  mt.on('tick', function(next){
-    // Do this every second
-    updateRemaining(next);
-  });
-
-  mt.on('day', function(){
-    // It's a new day :) Update today's prayer times.
-    populateTimes(mt.mosque);
-  });
-
-  mt.on('prayer', function(prayerTimes){
-    setTimeout(function(){
-      takbir.play();
-      humane.log("Time for "+prayerTimes.prayer.toCapitalize()+ "! <span class='nextprayercounter'></span> ");
-      updateRemaining();
-    }, 1000);
-  });
-
-  mt.ready(function(){
-    populateTimes(mt.mosque);
-    updateRemaining();
-  });
-
-  // Ask for location
-  mt.initFromCoords(function(cb){
-    $('#nextprayercounter').html("This isn't si7r. We're calculating your location...");
-    console.debug("getCurrentPosition called.");
-    navigator.geolocation.getCurrentPosition(function(positionData){
-      console.debug("Received current position: ", positionData);
-      cb(positionData.coords);
-    }, function(error){
-      var doThisWhenError = function () {
-        mt.initFromNothing();
-      };
-      switch(error.code){
-        case error.PERMISSION_DENIED:
-          bootbox.alert("Y u decline position ya3ni? <br /><br />We'll let you choose from the list of ALL mosques we have available.", doThisWhenError);
-          break;
-        case error.POSITION_UNAVAILABLE:
-          bootbox.alert("It looks like we can't find your position! Maybe you're in the sahara desert or, ya3ni, your browser not very good. <br /><br />We'll let you choose from the list of ALL mosques we have available.", doThisWhenError);
-          break;
-        case error.TIMEOUT:
-          bootbox.alert("It's taking longer than expected to figure out your position. Either your browser is lazy or, ya3ni, there's something wrong. <br /><br />We'll let you choose from the list of ALL mosques we have available.", doThisWhenError);
-          break;
-      }
-    }, {timeout: 5000});
-  });
 
 });
 
