@@ -1,9 +1,22 @@
 'use strict';
-
+var checkAppCache = function(){
+  window.applicationCache.update();
+  window.applicationCache.addEventListener('updateready', function(e) {
+    if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
+      // Browser downloaded a new app cache.
+      // Swap it in and reload the page to get the new hotness.
+      window.applicationCache.swapCache();
+      window.location.reload();
+    } else {
+      // Manifest didn't changed. Nothing new to server.
+    }
+  }, false);
+};
 /* Controllers */
 
 angular.module('myApp.controllers', []).
   controller('MasjidTimesCtrl', [function() {
+      checkAppCache();
       window.backgrounds = [
         {prayer: 'fajr-top', element: $('#top-dashboard #fajr-bg.background')},
         {prayer: 'shuruq', element: $('#top-dashboard #shuruq-bg.background')},
@@ -87,6 +100,7 @@ angular.module('myApp.controllers', []).
         updateRemaining();
       }
     }]).controller('AboutPageCtrl', [function(){
+      checkAppCache();
       $('#top-nav').children('li').removeClass('active');
       $('#about-nav').addClass('active');
 
