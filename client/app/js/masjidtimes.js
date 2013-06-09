@@ -670,7 +670,7 @@ var newMasjidTimes = function (config, my) {
     var prayer, date;
     if(previous == -1){
       prayer = 'isha';
-      date = times.stringToDate(times.getYesterday()[isha], new Date(getDate().getTime() - 24 * 60 * 60 * 1000));
+      date = times.stringToDate(times.getYesterday()[prayer], new Date(getDate().getTime() - 24 * 60 * 60 * 1000));
     } else {
       prayer = prayers[previous];
       date = times.stringToDate(times.getToday()[prayer]);
