@@ -56,16 +56,35 @@ angular.module('myApp.controllers', []).
       });
 
       mt.on('prayer', function(prayerTimes){
-        setTimeout(function(){
-          takbir.play();
-          humane.log("Time for "+prayerTimes.prayer.toCapitalize()+ "! <span class='nextprayercounter'></span> ");
-          updateRemaining();
-        }, 1000);
+        var id = prayerTimes.date.getTime();
+        if(handledAlarms[id] == undefined){
+          handledAlarms[id] = prayerTimes;
+          setTimeout(function(){
+            takbir.play();
+            humane.log("Time for "+prayerTimes.prayer.toCapitalize()+ "! <span class='nextprayercounter'></span> ");
+            updateRemaining();
+
+            if(chrome && chrome.runtime && chrome.runtime.getBackgroundPage){
+              chrome.runtime.getBackgroundPage(function(bg){bg.setMasjidTimeAlarms(mt)});
+            }
+
+          }, 1000);
+        }
       });
 
       mt.ready(function(){
         populateTimes(mt.mosque);
         updateRemaining();
+
+        // Fire any things we were waiting for
+        if(window.fireWhenReady){
+          mt.fire(window.fireWhenReady.name, window.fireWhenReady.args);
+          window.fireWhenReady = undefined;
+        }
+
+        if(chrome && chrome.runtime && chrome.runtime.getBackgroundPage){
+          chrome.runtime.getBackgroundPage(function(bg){bg.setMasjidTimeAlarms(mt)});
+        }
       });
 
       // Ask for location

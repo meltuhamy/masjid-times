@@ -1,6 +1,14 @@
 var mt;
 var backgrounds;
+var handledAlarms = [];
 
+window.location.reload = function(){
+  if(chrome && chrome.app){
+    chrome.runtime.reload();
+  } else {
+    window.location.reload();
+  }
+};
 var fixBackgroundHeight = function(){
   // Fix background height (very hacky :( )
   $('#top-dashboard .background').height($('#top-dashboard').outerHeight());
@@ -183,6 +191,8 @@ soundManager.setup({
 
   }
 });
+
+
 
 /**
  * Finally...
