@@ -1,6 +1,7 @@
 var mt;
 var backgrounds;
 var handledAlarms = [];
+var chrome = chrome || undefined;
 
 window.location.reload = function(){
   if(chrome && chrome.app){
