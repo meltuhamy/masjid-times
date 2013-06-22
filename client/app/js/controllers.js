@@ -1,7 +1,7 @@
 'use strict';
 var checkAppCache = function(){
   try{
-    if(!(chrome && chrome.app)){
+    if(!(window.chrome && window.chrome.app && window.chrome.app.getIsInstalled())){
       window.applicationCache.update();
       window.applicationCache.addEventListener('updateready', function(e) {
         if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
