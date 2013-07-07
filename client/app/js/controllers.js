@@ -1,5 +1,6 @@
 'use strict';
 var checkAppCache = function(){
+  return;
   try{
     if(!(window.chrome && window.chrome.app && window.chrome.app.getIsInstalled())){
       window.applicationCache.update();
@@ -129,4 +130,8 @@ angular.module('myApp.controllers', []).
       $('#top-nav').children('li').removeClass('active');
       $('#about-nav').addClass('active');
 
+    }]).controller('SettingsCtrl', [function(){
+      checkAppCache();
+      $('#top-nav').children('li').removeClass('active');
+      $('#settings-nav').addClass('active');
     }]);
