@@ -141,6 +141,6 @@ angular.module('myApp.controllers', []).
       $scope.clearCache = function(){
         // Clear cache
         mt.clearLocalStorage();
-        window.location.href="#/home";
+//        window.location.href="#/home";
       };
     }]);
