@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Manifest Version: 0.0.10
+# Manifest Version: 0.0.11
 audio/takbir.ogg
 css/bootstrap.min.css
 css/bootstrap-responsive.css
@@ -32,6 +32,7 @@ lib/angular/angular-resource.min.js
 lib/angular/angular-sanitize.js
 lib/angular/angular-sanitize.min.js
 partials/about.html
+partials/settings.html
 partials/home.html
 index.html
 
