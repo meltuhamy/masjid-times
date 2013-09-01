@@ -22,7 +22,7 @@ var checkAppCache = function(){
 /* Controllers */
 
 angular.module('myApp.controllers', []).
-  controller('MasjidTimesCtrl', [function() {
+  controller('MasjidTimesCtrl', ['$scope', function($scope) {
       checkAppCache();
       window.backgrounds = [
         {prayer: 'fajr-top', element: $('#top-dashboard #fajr-bg.background')},
@@ -37,6 +37,9 @@ angular.module('myApp.controllers', []).
       $(window).resize(function(){
         fixBackgroundHeight();
       });
+
+      // Show the today tab by default.
+      $scope.todayTomorrow = 'today';
 
       // Button listeners
       doButtonListeners();
@@ -138,6 +141,6 @@ angular.module('myApp.controllers', []).
       $scope.clearCache = function(){
         // Clear cache
         mt.clearLocalStorage();
-//        window.location.href="#/home";
+        window.location.href="#/home";
       };
     }]);

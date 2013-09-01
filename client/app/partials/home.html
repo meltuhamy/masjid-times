@@ -14,11 +14,11 @@
 <!-- Example row of columns -->
 <div class="tabbable">
     <ul class="nav nav-tabs">
-        <li class="active"><a href="#today" data-toggle="tab">Today</a></li>
-        <li><a href="#tomorrow" data-toggle="tab">Tomorrow</a></li>
+        <li class="active"><a data-toggle="tab" data-ng-click="todayTomorrow = 'today'">Today</a></li>
+        <li><a data-toggle="tab" data-ng-click="todayTomorrow = 'tomorrow'">Tomorrow</a></li>
     </ul>
     <div class="tab-content">
-        <div id="today" class="tab-pane active">
+        <div id="today" class="tab-pane active" data-ng-show="todayTomorrow == 'today'">
             <div class="row text-center">
                 <p><span class="todaytomorrow">Today</span>'s prayer times</p>
             </div>
@@ -55,7 +55,7 @@
                 </div>
             </div>
         </div>
-        <div id="tomorrow" class="tab-pane">
+        <div id="tomorrow" class="tab-pane active" data-ng-show="todayTomorrow == 'tomorrow'">
             <div class="row text-center">
                 <p><span class="todaytomorrow">Tomorrow</span>'s prayer times</p>
             </div>
