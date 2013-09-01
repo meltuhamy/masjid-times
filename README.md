@@ -12,8 +12,8 @@ Source code
 Right now, the project consists of three main areas:
 
 1. The [web service](https://github.com/meltuhamy/masjid-times/blob/master/server/index.php) found in ```server/index.php``` - this is the core of the prayer times web application (and other applications which I'm planning to do :P).
-2. The MasjidTimes [client library](https://github.com/meltuhamy/masjid-times/blob/master/client/js/masjidtimes.js) found in ```client/js/masjidtimes.js```- This is an event-driven javascript library that runs in the browser. It is used to drive the web app. Documentation for this is coming soon :)
-3. The MasjidTimes [web app](https://github.com/meltuhamy/masjid-times/tree/master/client) found in ```client/``` - This is the HTML, CSS and JavaScript that uses the MasjidTimes library and web service to show prayer times. You can see it live [here](http://meltuhamy.com/masjid-times).
+2. The MasjidTimes [client library](https://github.com/meltuhamy/masjid-times/blob/master/client/app/js/masjidtimes.js) found in ```client/js/masjidtimes.js```- This is an event-driven javascript library that runs in the browser. It is used to drive the web app. Documentation for this is coming soon :)
+3. The MasjidTimes [web app](https://github.com/meltuhamy/masjid-times/tree/master/client/app) found in ```client/``` - This is the HTML, CSS and JavaScript that uses the MasjidTimes library and web service to show prayer times. You can see it live [here](http://meltuhamy.com/masjid-times).
 
 I have plans of taking this further and creating native mobile apps that work in the same way as the web app. The idea is that since the web service is isolated from all application logic, we can use the prayer times API to create an application in any language and environment.
 
