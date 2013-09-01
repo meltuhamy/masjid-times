@@ -9,7 +9,7 @@ img/glyphicons-halflings.png
 img/glyphicons-halflings-white.png
 js/vendor/bootstrap.js
 js/vendor/bootstrap.min.js
-js/vendor/jquery-1.9.1.min.js
+js/vendor/jquery.min.js
 js/vendor/modernizr-2.6.2-respond-1.1.0.min.js
 js/app.js
 js/controllers.js

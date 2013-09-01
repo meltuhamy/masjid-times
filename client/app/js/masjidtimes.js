@@ -31,7 +31,7 @@ var newMasjidTimes = function (config, my) {
 
 
   var isset = function(i){
-    return ! ( i == undefined || i == null || (typeof(i) == "object" && function(){var n;for(n in i ){return false;}return true;}()) );
+    return ! ( i == undefined || i == null || (jQuery.type(i) !== 'date' && jQuery.isEmptyObject(i)) );
   };
 
   // If there is a storage methods, check and augment, otherwise use our own

@@ -130,8 +130,14 @@ angular.module('myApp.controllers', []).
       $('#top-nav').children('li').removeClass('active');
       $('#about-nav').addClass('active');
 
-    }]).controller('SettingsCtrl', [function(){
+    }]).controller('SettingsCtrl', ['$scope', function($scope){
       checkAppCache();
       $('#top-nav').children('li').removeClass('active');
       $('#settings-nav').addClass('active');
+
+      $scope.clearCache = function(){
+        // Clear cache
+        mt.clearLocalStorage();
+//        window.location.href="#/home";
+      };
     }]);

@@ -91,11 +91,11 @@ var populateTimes = function(mosque){
  * Helper function to register click listeners
  */
 var doButtonListeners = function(){
-  $('#settings-clearcache').click(function(){
+/*  $('#settings-clearcache').click(function(){
     //Clear the cache and reload.
     mt.clearLocalStorage();
-    window.location.reload();
-  });
+    window.location.href = "#/home";
+  });*/
 };
 
 /**
@@ -103,6 +103,9 @@ var doButtonListeners = function(){
  * @param next
  */
 var updateRemaining = function(next){
+  if(mt){
+
+  }
   next = next || mt.times.getNext();
   var text, title, previous;
   updateBackground(next, mt.times.getPrevious());
@@ -156,7 +159,7 @@ var pickMosqueDialog = function(mosques){
   text += "<ol id='mosque-list'>";
   for(var i = 0; i< numMosques; i++){
     var mosque = mosques[i];
-    text += "<li data-mosque-index='"+i+"'><b>"+mosque.name+"</b><br /><span class='label'>"+Math.round(mosque.distance*10)/10+" km</span> "+mosque.location+"</li>";
+    text += "<li data-mosque-index='"+i+"'><b>"+mosque.name+"</b><br /><span class='label label-default'>"+Math.round(mosque.distance*10)/10+" km</span> "+mosque.location+"</li>";
   }
   text += "</ol>";
   bootbox.alert(text, function(){
