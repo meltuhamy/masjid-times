@@ -1,10 +1,12 @@
 CACHE MANIFEST
-# Manifest Version: 0.0.13
+# Manifest Version: 0.0.14
 audio/takbir.ogg
 css/bootstrap.min.css
 css/bootstrap-responsive.css
 css/bootstrap-responsive.min.css
 css/main.css
+css/gh-fork-ribbon.css
+css/gh-fork-ribbon.ie.css
 img/glyphicons-halflings.png
 img/glyphicons-halflings-white.png
 js/vendor/bootstrap.js
