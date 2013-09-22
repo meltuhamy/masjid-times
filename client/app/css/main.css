@@ -198,6 +198,10 @@ body {
     transition: opacity 0.5s ease;
 }
 
+div.row.prayertimes {
+    text-align: center;
+}
+
 div.row.prayertimes>div{
     display: inline-block;
 }
