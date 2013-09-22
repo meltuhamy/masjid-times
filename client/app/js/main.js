@@ -3,6 +3,9 @@ var backgrounds;
 var handledAlarms = [];
 var chrome = chrome || undefined;
 
+mt = newMasjidTimes(masjidConfig);
+
+
 window.location.reload = function(){
   if(chrome && chrome.app){
     chrome.runtime.reload();
@@ -96,40 +99,6 @@ var doButtonListeners = function(){
     mt.clearLocalStorage();
     window.location.href = "#/home";
   });*/
-};
-
-/**
- * Helper function that gets called ever second by mt
- * @param next
- */
-var updateRemaining = function(next){
-  if(mt){
-
-  }
-  next = next || mt.times.getNext();
-  var text, title, previous;
-  updateBackground(next, mt.times.getPrevious());
-  if(next.remaining > 1000){
-    var textArray = remaining.getArray(next.remaining/1000);
-    textArray[0] = textArray[0] == undefined || textArray[0] == 0 ? '' : (textArray[0] == 1? textArray[0] + ' Hour' : textArray[0] + ' Hours' );
-    textArray[1] = textArray[1] == undefined || textArray[1] == 0 ? '' : (textArray[1] == 1? textArray[1] + ' Minute' : textArray[1] + ' Minutes' );
-
-    if(textArray[0] == '' && textArray[1] == '' && textArray[2] != undefined){
-      // Less than a minute remaining.
-      text = ''+textArray[2] + (textArray[2] == 1 ? ' Second' : ' Seconds');
-    } else{
-      text = "" + textArray[0] + (textArray[0] == '' ? "" : (textArray[1] != 0 ? ", " : "")) + textArray[1];
-    }
-    title = next.prayer.toUpperCase()+" in " + text+" | Masjid Times";
-    text = text + '  until '+ next.prayer;
-  } else {
-    text = 'Prayer time!';
-    title = 'Prayer time!';
-  }
-  $('.nextprayercounter').html(text);
-  window.document.title = title;
-
-
 };
 
 /**

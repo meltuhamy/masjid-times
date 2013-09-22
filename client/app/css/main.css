@@ -172,7 +172,7 @@ body {
 }
 
 #top-dashboard{
-    max-width: 540px;
+    /*max-width: 540px;*/
     margin-left: auto;
     margin-right: auto;
     position: relative;
@@ -198,6 +198,9 @@ body {
     transition: opacity 0.5s ease;
 }
 
+div.row.prayertimes>div{
+    display: inline-block;
+}
 
 #top-dashboard #fajr-bg.background{
     background-image: -webkit-linear-gradient(top, #091b41, #2d345e 13%, #3c4169 25%, #535479 38%, #666283 50%, #8c7f91 62%, #b39c98 75%, #c6a48c 82%, #d9a96e 89%, #d4844e 94%, #934f44);
@@ -259,3 +262,4 @@ body {
 html{
     overflow-y: auto;
 }
+

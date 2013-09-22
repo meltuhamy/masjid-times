@@ -23,6 +23,46 @@ var checkAppCache = function(){
 
 angular.module('myApp.controllers', []).
   controller('MasjidTimesCtrl', ['$scope', function($scope) {
+
+
+      var updateRemaining = function(next){
+        next = mt.times.getNext();
+        var text, title, previous;
+        previous =  mt.times.getPrevious();
+        updateBackground(next, previous);
+        if(next.remaining > 1000){
+          var textArray = remaining.getArray(next.remaining/1000);
+          textArray[0] = textArray[0] == undefined || textArray[0] == 0 ? '' : (textArray[0] == 1? textArray[0] + ' Hour' : textArray[0] + ' Hours' );
+          textArray[1] = textArray[1] == undefined || textArray[1] == 0 ? '' : (textArray[1] == 1? textArray[1] + ' Minute' : textArray[1] + ' Minutes' );
+
+          if(textArray[0] == '' && textArray[1] == '' && textArray[2] != undefined){
+            // Less than a minute remaining.
+            text = ''+textArray[2] + (textArray[2] == 1 ? ' Second' : ' Seconds');
+          } else{
+            text = "" + textArray[0] + (textArray[0] == '' ? "" : (textArray[1] != 0 ? ", " : "")) + textArray[1];
+          }
+          title = next.prayer.toUpperCase()+" in " + text+" | Masjid Times";
+          text = text + '  until '+ next.prayer;
+        } else {
+          text = 'Prayer time!';
+          title = 'Prayer time!';
+        }
+
+        window.document.title = title;
+
+        // Update the previous/next athan
+
+
+        $scope.$apply(function () {
+          $scope.nextPrayerCounterText = text;
+          $scope.previous = previous;
+          $scope.next = next;
+
+        });
+        $(window).trigger('resize');
+
+      };
+
       checkAppCache();
       window.backgrounds = [
         {prayer: 'fajr-top', element: $('#top-dashboard #fajr-bg.background')},
@@ -43,7 +83,10 @@ angular.module('myApp.controllers', []).
 
       // Button listeners
       doButtonListeners();
-      mt = newMasjidTimes(masjidConfig);
+
+      //fittext
+      $('.nextprayercounter').fitText(1.7);
+      $(window).trigger('resize');
 
 
       // NOTE: Event handlers should be called first before init.
@@ -54,7 +97,6 @@ angular.module('myApp.controllers', []).
       });
 
       mt.on('tick', function(next){
-        // Do this every second
         updateRemaining(next);
       });
 
@@ -141,6 +183,7 @@ angular.module('myApp.controllers', []).
       $scope.clearCache = function(){
         // Clear cache
         mt.clearLocalStorage();
+        humane.log("Cache cleared");
 //        window.location.href="#/home";
       };
     }]);

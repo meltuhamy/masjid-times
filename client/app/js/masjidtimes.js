@@ -335,7 +335,12 @@ var newMasjidTimes = function (config, my) {
    * Clears all local storage stored by masjidTimes
    */
   var clearLocalStorage = function () {
+    ticker.stop();
     storage.clear();
+    using = {};
+    initialised = false;
+    triggeredMosqueSelection = false;
+
   };
 
 

@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Manifest Version: 0.0.12
+# Manifest Version: 0.0.13
 audio/takbir.ogg
 css/bootstrap.min.css
 css/bootstrap-responsive.css
@@ -20,6 +20,7 @@ js/main.js
 js/masjidtimes.js
 js/plugins.js
 js/services.js
+js/vendor/jquery.fittext.js
 lib/angular/angular.js
 lib/angular/angular-route.js
 lib/angular/angular.min.js

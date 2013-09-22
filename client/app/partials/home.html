@@ -1,6 +1,7 @@
 <!-- Main hero unit for a primary marketing message or call to action -->
 <div class="well text-center" id="top-dashboard">
-    <h4 class="nextprayercounter">Loading...</h4>
+    <h4 class="nextprayercounter">{{nextPrayerCounterText}}</h4>
+    <p id="next-previous-status">Past: {{previous.prayer|uppercase}} ({{previous.date | date:'hh:mm'}}) Next: {{next.prayer|uppercase}} ({{next.date | date:'hh:mm'}})</p>
     <small><span class="mosque-name"></span></small>
     <div id="isha-fajr-bg" class="background" style="opacity: 1"></div>
     <div id="isha-bg" class="background"></div>
@@ -22,7 +23,7 @@
             <div class="row text-center">
                 <p><span class="todaytomorrow">Today</span>'s prayer times</p>
             </div>
-            <div class="row today">
+            <div class="row today prayertimes">
                 <div class="col-sm-2">
                     <h3>Fajr</h3>
                     <p class="fajr-time"></p>
@@ -53,7 +54,7 @@
             <div class="row text-center">
                 <p><span class="todaytomorrow">Tomorrow</span>'s prayer times</p>
             </div>
-            <div class="row tomorrow">
+            <div class="row tomorrow prayertimes">
                 <div class="col-sm-2">
                     <h3>Fajr</h3>
                     <p class="fajr-time"></p>
