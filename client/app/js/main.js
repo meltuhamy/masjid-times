@@ -67,7 +67,6 @@ var updateBackground = function(next, previous){
   var diff = nextDate - previousDate;
   var percentDone = 1 - remaining/diff;
   setBackgroundState(next.prayer, percentDone);
-
 };
 
 /**

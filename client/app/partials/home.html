@@ -1,7 +1,7 @@
 <!-- Main hero unit for a primary marketing message or call to action -->
 <div class="well text-center" id="top-dashboard">
-    <div ng-hide="!nextPrayerCounterText">
-        <h4 class="nextprayercounter">{{nextPrayerCounterText}}</h4>
+    <div ng-hide="!nextPrayerCounterText" ng-style="dashboardColor">
+        <h4 class="nextprayercounter" >{{nextPrayerCounterText}}</h4>
         <p id="next-previous-status">{{previous.prayer|uppercase}} {{previous.date | date:'HH:mm'}}, {{next.prayer|uppercase}} {{next.date | date:'HH:mm'}}</p>
         <small><span class="mosque-name"></span></small>
     </div>

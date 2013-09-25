@@ -27,11 +27,15 @@ angular.module('myApp.controllers', []).
       $('.nextprayercounter').fitText(1.7);
       $(window).trigger('resize');
 
+
       var updateRemaining = function(next){
         next = mt.times.getNext();
         var text, title, previous;
         previous =  mt.times.getPrevious();
         updateBackground(next, previous);
+
+
+
         if(next.remaining > 1000){
           var textArray = remaining.getArray(next.remaining/1000);
           textArray[0] = textArray[0] == undefined || textArray[0] == 0 ? '' : (textArray[0] == 1? textArray[0] + ' Hour' : textArray[0] + ' Hours' );
@@ -54,17 +58,33 @@ angular.module('myApp.controllers', []).
 
         // Update the previous/next athan
 
+        // Text color
+
+
+
+
         if(!$scope.$$phase) {
           //$digest or $apply
           $scope.$apply(function () {
             $scope.nextPrayerCounterText = text;
             $scope.previous = previous;
             $scope.next = next;
+
+            if(/isha|fajr/.test(next.prayer)){
+              $scope.dashboardColor = {'color': 'white', 'text-shadow': '0px 0px 7px #090808'};
+            } else {
+              $scope.dashboardColor = undefined;
+            }
           });
         } else {
           $scope.nextPrayerCounterText = text;
           $scope.previous = previous;
           $scope.next = next;
+          if(/isha|fajr/.test(next.prayer)){
+            $scope.dashboardColor = {'color': 'white', 'text-shadow': '0px 0px 7px #090808'};
+          } else {
+            $scope.dashboardColor = undefined;
+          }
         }
 
         $(window).trigger('resize');
