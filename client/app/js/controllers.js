@@ -22,8 +22,10 @@ var checkAppCache = function(){
 /* Controllers */
 
 angular.module('myApp.controllers', []).
-  controller('MasjidTimesCtrl', ['$scope', function($scope) {
-
+  controller('MasjidTimesCtrl', ['$scope', '$route', function($scope, $route) {
+      //fittext
+      $('.nextprayercounter').fitText(1.7);
+      $(window).trigger('resize');
 
       var updateRemaining = function(next){
         next = mt.times.getNext();
@@ -52,13 +54,19 @@ angular.module('myApp.controllers', []).
 
         // Update the previous/next athan
 
-
-        $scope.$apply(function () {
+        if(!$scope.$$phase) {
+          //$digest or $apply
+          $scope.$apply(function () {
+            $scope.nextPrayerCounterText = text;
+            $scope.previous = previous;
+            $scope.next = next;
+          });
+        } else {
           $scope.nextPrayerCounterText = text;
           $scope.previous = previous;
           $scope.next = next;
+        }
 
-        });
         $(window).trigger('resize');
 
       };
@@ -84,98 +92,103 @@ angular.module('myApp.controllers', []).
       // Button listeners
       doButtonListeners();
 
-      //fittext
-      $('.nextprayercounter').fitText(1.7);
-      $(window).trigger('resize');
 
 
-      // NOTE: Event handlers should be called first before init.
+      // We should only do this stuff once.
+      if(!mt.initialised){
+        // NOTE: Event handlers should be called first before init.
 
-      // Get the nearest mosques
-      mt.on('mosques', function(nearestMosques){
-        pickMosqueDialog(nearestMosques);
-      });
+        // Get the nearest mosques
+        mt.on('mosques', function(nearestMosques){
+          pickMosqueDialog(nearestMosques);
+        });
 
-      mt.on('tick', function(next){
-        updateRemaining(next);
-      });
+        mt.on('tick', function(next){
+          updateRemaining(next);
+        });
 
-      mt.on('day', function(){
-        // It's a new day :) Update today's prayer times.
-        populateTimes(mt.mosque);
-      });
+        mt.on('day', function(){
+          // It's a new day :) Update today's prayer times.
+          populateTimes(mt.mosque);
+        });
 
-      mt.on('prayer', function(prayerTimes){
-        var id = prayerTimes.date.getTime();
-        if(handledAlarms[id] == undefined){
-          handledAlarms[id] = prayerTimes;
-          setTimeout(function(){
-            takbir.play();
-            humane.log("Time for "+prayerTimes.prayer.toCapitalize()+ "! <span class='nextprayercounter'></span> ");
-            updateRemaining();
+        mt.on('prayer', function(prayerTimes){
+          var id = prayerTimes.date.getTime();
+          if(handledAlarms[id] == undefined){
+            handledAlarms[id] = prayerTimes;
+            setTimeout(function(){
+              takbir.play();
+              humane.log("Time for "+prayerTimes.prayer.toCapitalize()+ "! <span class='nextprayercounter'></span> ");
+              updateRemaining();
 
-            if(chrome && chrome.runtime && chrome.runtime.getBackgroundPage){
-              chrome.runtime.getBackgroundPage(function(bg){bg.setMasjidTimeAlarms(mt)});
-            }
+              if(chrome && chrome.runtime && chrome.runtime.getBackgroundPage){
+                chrome.runtime.getBackgroundPage(function(bg){bg.setMasjidTimeAlarms(mt)});
+              }
 
-          }, 1000);
-        }
-      });
-
-      mt.ready(function(){
-        populateTimes(mt.mosque);
-        updateRemaining();
-
-        // Fire any things we were waiting for
-        if(window.fireWhenReady){
-          mt.fire(window.fireWhenReady.name, window.fireWhenReady.args);
-          window.fireWhenReady = undefined;
-        }
-
-        if(chrome && chrome.runtime && chrome.runtime.getBackgroundPage){
-          chrome.runtime.getBackgroundPage(function(bg){bg.setMasjidTimeAlarms(mt)});
-        }
-      });
-
-      // Ask for location
-      mt.initFromCoords(function(cb){
-        $('#nextprayercounter').html("This isn't si7r. We're calculating your location...");
-        console.debug("getCurrentPosition called.");
-        navigator.geolocation.getCurrentPosition(function(positionData){
-          console.debug("Received current position: ", positionData);
-          cb(positionData.coords);
-        }, function(error){
-          var doThisWhenError = function () {
-            mt.initFromNothing();
-          };
-          switch(error.code){
-            case error.PERMISSION_DENIED:
-              bootbox.alert("Y u decline position ya3ni? <br /><br />We'll let you choose from the list of ALL mosques we have available.", doThisWhenError);
-              break;
-            case error.POSITION_UNAVAILABLE:
-              bootbox.alert("It looks like we can't find your position! Maybe you're in the sahara desert or, ya3ni, your browser not very good. <br /><br />We'll let you choose from the list of ALL mosques we have available.", doThisWhenError);
-              break;
-            case error.TIMEOUT:
-              bootbox.alert("It's taking longer than expected to figure out your position. Either your browser is lazy or, ya3ni, there's something wrong. <br /><br />We'll let you choose from the list of ALL mosques we have available.", doThisWhenError);
-              break;
+            }, 1000);
           }
-        }, {timeout: 5000});
-      });
+        });
+
+        mt.ready(function(){
+          populateTimes(mt.mosque);
+          updateRemaining();
+
+          // Fire any things we were waiting for
+          if(window.fireWhenReady){
+            mt.fire(window.fireWhenReady.name, window.fireWhenReady.args);
+            window.fireWhenReady = undefined;
+          }
+
+          if(chrome && chrome.runtime && chrome.runtime.getBackgroundPage){
+            chrome.runtime.getBackgroundPage(function(bg){bg.setMasjidTimeAlarms(mt)});
+          }
+        });
+
+        // Ask for location
+        mt.initFromCoords(function(cb){
+          $('#nextprayercounter').html("This isn't si7r. We're calculating your location...");
+          console.debug("getCurrentPosition called.");
+          navigator.geolocation.getCurrentPosition(function(positionData){
+            console.debug("Received current position: ", positionData);
+            cb(positionData.coords);
+          }, function(error){
+            var doThisWhenError = function () {
+              mt.initFromNothing();
+            };
+            switch(error.code){
+              case error.PERMISSION_DENIED:
+                bootbox.alert("Y u decline position ya3ni? <br /><br />We'll let you choose from the list of ALL mosques we have available.", doThisWhenError);
+                break;
+              case error.POSITION_UNAVAILABLE:
+                bootbox.alert("It looks like we can't find your position! Maybe you're in the sahara desert or, ya3ni, your browser not very good. <br /><br />We'll let you choose from the list of ALL mosques we have available.", doThisWhenError);
+                break;
+              case error.TIMEOUT:
+                bootbox.alert("It's taking longer than expected to figure out your position. Either your browser is lazy or, ya3ni, there's something wrong. <br /><br />We'll let you choose from the list of ALL mosques we have available.", doThisWhenError);
+                break;
+            }
+          }, {timeout: 5000});
+          if(mt.initialised){
+            populateTimes(mt.mosque);
+            updateRemaining();
+          }
+        });
+      } else {
+        // If mt has been initialised before, update the text and stuff.
+        updateRemaining();
+      }
+
 
 
       $('#top-nav').children('li').removeClass('active');
       $('#home-nav').addClass('active');
 
-      if(mt.mosque){
-        populateTimes(mt.mosque);
-        updateRemaining();
-      }
+
     }]).controller('AboutPageCtrl', [function(){
       checkAppCache();
       $('#top-nav').children('li').removeClass('active');
       $('#about-nav').addClass('active');
 
-    }]).controller('SettingsCtrl', ['$scope', function($scope){
+    }]).controller('SettingsCtrl', ['$scope', '$route', function($scope, $route){
       checkAppCache();
       $('#top-nav').children('li').removeClass('active');
       $('#settings-nav').addClass('active');
@@ -183,6 +196,7 @@ angular.module('myApp.controllers', []).
       $scope.clearCache = function(){
         // Clear cache
         mt.clearLocalStorage();
+        $route.reload();
         humane.log("Cache cleared");
 //        window.location.href="#/home";
       };

@@ -335,11 +335,24 @@ var newMasjidTimes = function (config, my) {
    * Clears all local storage stored by masjidTimes
    */
   var clearLocalStorage = function () {
+
+    // Need to clear all callbacks.
+    for(cb in events){
+      if(events.hasOwnProperty(cb)){
+        events[cb].empty();
+      }
+    }
+
+
+
     ticker.stop();
     storage.clear();
     using = {};
     initialised = false;
     triggeredMosqueSelection = false;
+
+    // re-register default events
+    registerDefaultEvents();
 
   };
 
@@ -402,56 +415,61 @@ var newMasjidTimes = function (config, my) {
     return that;
   };
 
-
-  on('debug', function(data){
-    if(data.event != 'tick') console.debug({Event : data.event, args: data.args});
-  });
-
-  on('mosque', function(mosque){
-    // Someone has chosen a mosque.
-    using.mosque = mosque;
-
-    storage.setKey(l.mosque, mosque, function(){
-      if(!initialised){
-        checkInit();
-      }
+  var registerDefaultEvents = function(){
+    on('debug', function(data){
+      if(data.event != 'tick') console.debug({Event : data.event, args: data.args});
     });
-  });
 
-  on('prayertimes', function(prayerTimes){
-    // We have got the prayer times.
-    using.prayer = prayerTimes;
-    storage.setKey(l.prayer, prayerTimes, function(){
-      if(!initialised){
-        checkInit();
-      }
+    on('mosque', function(mosque){
+      // Someone has chosen a mosque.
+      using.mosque = mosque;
+
+      storage.setKey(l.mosque, mosque, function(){
+        if(!initialised){
+          checkInit();
+        }
+      });
     });
-  });
 
-  on('ready', function(){
-    initialised = true;
-    ticker.start();
-    // Start ticker
-  });
+    on('prayertimes', function(prayerTimes){
+      // We have got the prayer times.
+      using.prayer = prayerTimes;
+      storage.setKey(l.prayer, prayerTimes, function(){
+        if(!initialised){
+          checkInit();
+        }
+      });
+    });
 
-  on('tick', function(nextTimes){
-    var newTick = getDate('forced');
-    if(isset(times.tick) && (times.tick.day != newTick.day || times.tick.month != newTick.month)){
-      // We're on a different day than before.
-      fire('day', times.getDay(newTick));
-    }
+    on('ready', function(){
+      initialised = true;
+      ticker.start();
+      // Start ticker
+    });
 
-    if(nextTimes.remaining <= 1000){
-      fire('prayer', nextTimes);
-    }
+    on('tick', function(nextTimes){
+      var newTick = getDate('forced');
+      if(isset(times.tick) && (times.tick.day != newTick.day || times.tick.month != newTick.month)){
+        // We're on a different day than before.
+        fire('day', times.getDay(newTick));
+      }
 
-    // From now on, we can treat tick as the current date/time.
-    times.tick = newTick;
-  });
+      if(nextTimes.remaining <= 1000){
+        fire('prayer', nextTimes);
+      }
 
-  on('prayer', function(nextTimes){
-    fire(nextTimes.prayer, nextTimes);
-  });
+      // From now on, we can treat tick as the current date/time.
+      times.tick = newTick;
+    });
+
+    on('prayer', function(nextTimes){
+      fire(nextTimes.prayer, nextTimes);
+    });
+
+  };
+
+  registerDefaultEvents();
+
 
 
   /**
@@ -800,6 +818,7 @@ var newMasjidTimes = function (config, my) {
   that.fire = fire;
   that.on = on;
   that.storage = storage;
+  that.initialised = initialised;
 
 
 

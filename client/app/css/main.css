@@ -1,11 +1,14 @@
+@font-face {
+    font-family: 'Cantora One';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Cantora One'), local('CantoraOne-Regular'), url(Cantora_One.woff) format('woff');
+}
 
-
-/* ==========================================================================
-   Author's custom styles
-   ========================================================================== */
 
 .nextprayercounter{
   text-transform: capitalize;
+    font-family: 'Cantora One';
 }
 
 #mosque-list{
