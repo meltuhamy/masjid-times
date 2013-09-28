@@ -19,7 +19,7 @@
 
 
 </head>
-<body>
+<body ng-controller="bodyCtrl">
 <!--[if lt IE 7]>
 <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade
     your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to
@@ -40,9 +40,9 @@
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav" id="top-nav">
-                <li id="home-nav" class="active"><a href="#">Home</a></li>
-                <li id="settings-nav"><a href="#/settings">Settings</a></li>
-                <li id="about-nav"><a href="#/about">About</a></li>
+                <li id="home-nav" ng-class="{active: currentNav == 'home'}"><a href="#">Home</a></li>
+                <li id="settings-nav" ng-class="{active: currentNav == 'settings'}"><a href="#/settings">Settings</a></li>
+                <li id="about-nav" ng-class="{active: currentNav == 'about'}"><a href="#/about">About</a></li>
             </ul>
         </div><!--/.navbar-collapse -->
     </div>

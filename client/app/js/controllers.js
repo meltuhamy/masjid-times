@@ -22,7 +22,14 @@ var checkAppCache = function(){
 /* Controllers */
 
 angular.module('myApp.controllers', []).
-  controller('MasjidTimesCtrl', ['$scope', '$route', 'masjidtimes', 'backgroundManager', function($scope, $route, mt, background) {
+    controller('bodyCtrl', ['$scope', function($scope) {
+      $scope.setCurrentNav = function(newNav){
+        $scope.currentNav = newNav;
+      };
+      $scope.setCurrentNav('home'); // default.
+    }])
+    .controller('MasjidTimesCtrl', ['$scope', '$route', 'masjidtimes', 'backgroundManager', function($scope, $route, mt, background) {
+      $scope.setCurrentNav('home');
 
       /**
        * Helper function to display prayer times into DOM
@@ -247,20 +254,15 @@ angular.module('myApp.controllers', []).
       }
 
 
+    }]).controller('AboutPageCtrl', ['$scope',function($scope){
+      $scope.setCurrentNav('about');
 
-      $('#top-nav').children('li').removeClass('active');
-      $('#home-nav').addClass('active');
-
-
-    }]).controller('AboutPageCtrl', [function(){
       checkAppCache();
-      $('#top-nav').children('li').removeClass('active');
-      $('#about-nav').addClass('active');
 
     }]).controller('SettingsCtrl', ['$scope', '$route', 'masjidtimes', function($scope, $route, mt){
+      $scope.setCurrentNav('settings');
+
       checkAppCache();
-      $('#top-nav').children('li').removeClass('active');
-      $('#settings-nav').addClass('active');
 
       $scope.clearCache = function(){
         // Clear cache
