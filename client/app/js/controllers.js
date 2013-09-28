@@ -22,7 +22,76 @@ var checkAppCache = function(){
 /* Controllers */
 
 angular.module('myApp.controllers', []).
-  controller('MasjidTimesCtrl', ['$scope', '$route', function($scope, $route) {
+  controller('MasjidTimesCtrl', ['$scope', '$route', 'masjidtimes', 'backgroundManager', function($scope, $route, mt, background) {
+
+      /**
+       * Helper function to display prayer times into DOM
+       * @param mosque
+       */
+      var populateTimes = function(mosque){
+        //Update any mosque name place holders.
+        $('.mosque-name').html(mosque.name);
+
+        //Populate today's times.
+        var times = mt.times.getToday();
+        var timesTomorrow = mt.times.getTomorrow();
+        for(var i = 0; i<mt.prayers.length; i++){
+          $('.today .'+mt.prayers[i]+'-time').html(times[mt.prayers[i]]);
+          $('.tomorrow .'+mt.prayers[i]+'-time').html(timesTomorrow[mt.prayers[i]]);
+        }
+
+        background.fixBackgroundHeight();
+
+      };
+
+
+      /**
+       * Helper function that allows the user to select a mosque
+       * @param mosques
+       */
+      var pickMosqueDialog = function(mosques){
+        /*
+         A mosque looks like this:
+         capacity: "1100"
+         contact: "020 7736 9060"
+         description: "Arab"
+         distance: "1.4017961344562937"
+         dst-end: null
+         dst-start: null
+         id: "6"
+         lat: "51.476309"
+         location: "7 Bridges Place, Parsons Green, London, Greater London, SW6 4HW"
+         long: "-0.201616"
+         name: "Al-Muntada Al-Islami Trust"
+         prayertimes_id: "2"
+         */
+        var numMosques = mosques.length;
+        numMosques = numMosques < 5 ? numMosques : 4; // Max 4 mosques
+        var text = "Select a mosque";
+
+        text += "<ol id='mosque-list'>";
+        for(var i = 0; i< numMosques; i++){
+          var mosque = mosques[i];
+          text += "<li data-mosque-index='"+i+"'><b>"+mosque.name+"</b><br /><span class='label label-default'>"+Math.round(mosque.distance*10)/10+" km</span> "+mosque.location+"</li>";
+        }
+        text += "</ol>";
+        bootbox.alert(text, function(){
+          var mosque = mosques[$('#mosque-list').find('li.selected').data('mosque-index')];
+          mt.useMosque(mosque);
+          humane.log("Mosque saved:<br />"+mosque.name);
+          $('body').scrollTop(0);
+        });
+        var mosqueList = $('#mosque-list');
+        $(mosqueList).find('li:first').addClass('selected');
+        $(mosqueList).find('li').click(function(){
+          $('#mosque-list').find('li').removeClass('selected');
+          $(this).addClass('selected');
+        });
+      };
+
+
+
+      console.log(mt);
       //fittext
       $('.nextprayercounter').fitText(1.7);
       $(window).trigger('resize');
@@ -32,9 +101,7 @@ angular.module('myApp.controllers', []).
         next = mt.times.getNext();
         var text, title, previous;
         previous =  mt.times.getPrevious();
-        updateBackground(next, previous);
-
-
+        background.updateBackground(next, previous);
 
         if(next.remaining > 1000){
           var textArray = remaining.getArray(next.remaining/1000);
@@ -55,12 +122,6 @@ angular.module('myApp.controllers', []).
         }
 
         window.document.title = title;
-
-        // Update the previous/next athan
-
-        // Text color
-
-
 
 
         if(!$scope.$$phase) {
@@ -92,26 +153,14 @@ angular.module('myApp.controllers', []).
       };
 
       checkAppCache();
-      window.backgrounds = [
-        {prayer: 'fajr-top', element: $('#top-dashboard #fajr-bg.background')},
-        {prayer: 'shuruq', element: $('#top-dashboard #shuruq-bg.background')},
-        {prayer: 'duhr', element: $('#top-dashboard #duhr-bg.background')},
-        {prayer: 'asr', element: $('#top-dashboard #asr-bg.background')},
-        {prayer: 'maghrib', element: $('#top-dashboard #maghrib-bg.background')},
-        {prayer: 'isha', element: $('#top-dashboard #isha-bg.background')},
-        {prayer: 'fajr', element: $('#top-dashboard #isha-fajr-bg.background')}
-      ];
-      fixBackgroundHeight();
+
+      background.fixBackgroundHeight();
       $(window).resize(function(){
-        fixBackgroundHeight();
+        background.fixBackgroundHeight();
       });
 
       // Show the today tab by default.
       $scope.todayTomorrow = 'today';
-
-      // Button listeners
-      doButtonListeners();
-
 
 
       // We should only do this stuff once.
@@ -208,7 +257,7 @@ angular.module('myApp.controllers', []).
       $('#top-nav').children('li').removeClass('active');
       $('#about-nav').addClass('active');
 
-    }]).controller('SettingsCtrl', ['$scope', '$route', function($scope, $route){
+    }]).controller('SettingsCtrl', ['$scope', '$route', 'masjidtimes', function($scope, $route, mt){
       checkAppCache();
       $('#top-nav').children('li').removeClass('active');
       $('#settings-nav').addClass('active');
@@ -218,6 +267,5 @@ angular.module('myApp.controllers', []).
         mt.clearLocalStorage();
         $route.reload();
         humane.log("Cache cleared");
-//        window.location.href="#/home";
       };
     }]);

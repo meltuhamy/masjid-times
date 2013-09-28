@@ -205,6 +205,10 @@ div.row.prayertimes {
     text-align: center;
 }
 
+.prayertimes h3{
+    font-family: 'Cantora One';
+}
+
 div.row.prayertimes>div{
     display: inline-block;
 }
