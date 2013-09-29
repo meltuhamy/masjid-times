@@ -1,12 +1,13 @@
 <!-- Main hero unit for a primary marketing message or call to action -->
-<div class="well text-center" id="top-dashboard">
-    <div ng-hide="!nextPrayerCounterText" ng-style="dashboardColor">
+
+<div ng-show="!nextPrayerCounterText" class="text-center">Please wait while we try and get your location.</div>
+
+<div class="well text-center" id="top-dashboard" ng-hide="!nextPrayerCounterText">
+    <div ng-style="dashboardColor">
         <h4 class="nextprayercounter" >{{nextPrayerCounterText}}</h4>
         <p id="next-previous-status">{{previous.prayer|uppercase}} {{previous.date | date:'HH:mm'}}, {{next.prayer|uppercase}} {{next.date | date:'HH:mm'}}</p>
         <small><span class="mosque-name"></span></small>
     </div>
-
-    <div ng-show="!nextPrayerCounterText">Loading...</div>
 
     <div id="isha-fajr-bg" class="background" style="opacity: 1"></div>
     <div id="isha-bg" class="background"></div>
@@ -18,7 +19,7 @@
 </div>
 
 <!-- Example row of columns -->
-<div class="tabbable">
+<div class="tabbable" ng-hide="!nextPrayerCounterText">
     <ul class="nav nav-tabs">
         <li class="active"><a data-toggle="tab" data-ng-click="todayTomorrow = 'today'">Today</a></li>
         <li><a data-toggle="tab" data-ng-click="todayTomorrow = 'tomorrow'">Tomorrow</a></li>

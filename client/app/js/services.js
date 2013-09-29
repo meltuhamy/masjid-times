@@ -29,46 +29,35 @@ myModule.factory('masjidtimes', function(){
         }
       });
  }).factory('backgroundManager', function(){
-      var backgrounds = [
-        {prayer: 'fajr-top', element: $('#top-dashboard #fajr-bg.background')},
-        {prayer: 'shuruq', element: $('#top-dashboard #shuruq-bg.background')},
-        {prayer: 'duhr', element: $('#top-dashboard #duhr-bg.background')},
-        {prayer: 'asr', element: $('#top-dashboard #asr-bg.background')},
-        {prayer: 'maghrib', element: $('#top-dashboard #maghrib-bg.background')},
-        {prayer: 'isha', element: $('#top-dashboard #isha-bg.background')},
-        {prayer: 'fajr', element: $('#top-dashboard #isha-fajr-bg.background')}
-      ];
+      var backgrounds;
 
-      return {
+      var backgroundManager =  {
+        reset: function(){
+          backgrounds = [
+            {prayer: 'fajr-top', element: $('#top-dashboard #fajr-bg.background')},
+            {prayer: 'shuruq', element: $('#top-dashboard #shuruq-bg.background')},
+            {prayer: 'duhr', element: $('#top-dashboard #duhr-bg.background')},
+            {prayer: 'asr', element: $('#top-dashboard #asr-bg.background')},
+            {prayer: 'maghrib', element: $('#top-dashboard #maghrib-bg.background')},
+            {prayer: 'isha', element: $('#top-dashboard #isha-bg.background')},
+            {prayer: 'fajr', element: $('#top-dashboard #isha-fajr-bg.background')}
+          ];
+        },
         fixBackgroundHeight: function () {
           // Fix background height (very hacky :( )
           $('#top-dashboard .background').height($('#top-dashboard').outerHeight());
         },
 
-        makeTransparent: function (prayer, opacity, animated) {
+        makeTransparent: function (prayer, opacity) {
           opacity = opacity || 0.0;
           var element = $.type(prayer) == 'string' ? '#top-dashboard #' + prayer + '-bg.background' : prayer;
-          if (animated) {
-            $(element).animate({'opacity': opacity}, {
-              duration: 1000,
-              easing: 'swing'
-            });
-          } else {
-            $(element).css('opacity', opacity);
-          }
+          $(element).css('opacity', opacity);
         },
 
-        makeOpaque: function (prayer, animated) {
+        makeOpaque: function (prayer) {
           var element = $.type(prayer) == 'string' ? '#top-dashboard #' + prayer + '-bg.background' : prayer;
+          $(element).css('opacity', 1.0);
 
-          if (animated) {
-            $(element).animate({'opacity': 1.0}, {
-              duration: 1000,
-              easing: 'swing'
-            });
-          } else {
-            $(element).css('opacity', 1.0);
-          }
         },
 
         setBackgroundState: function (prayer, completeness) {
@@ -96,4 +85,6 @@ myModule.factory('masjidtimes', function(){
           this.setBackgroundState(next.prayer, percentDone);
         }
       }
+      backgroundManager.reset();
+      return backgroundManager;
     });

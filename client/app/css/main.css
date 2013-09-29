@@ -194,11 +194,6 @@ body {
     z-index: -1;
     width: 100%;
     height: 101px;
-    -webkit-transition: opacity 0.5s ease;
-    -moz-transition: opacity 0.5s ease;
-    -ms-transition: opacity 0.5s ease;
-    -o-transition: opacity 0.5s ease;
-    transition: opacity 0.5s ease;
 }
 
 div.row.prayertimes {

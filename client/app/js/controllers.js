@@ -30,6 +30,7 @@ angular.module('myApp.controllers', []).
     }])
     .controller('MasjidTimesCtrl', ['$scope', '$route', 'masjidtimes', 'backgroundManager', function($scope, $route, mt, background) {
       $scope.setCurrentNav('home');
+      background.reset();
 
       /**
        * Helper function to display prayer times into DOM
