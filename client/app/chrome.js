@@ -22,7 +22,7 @@ var openWindow = function(callback){
     appWindow.focus();
     if(typeof callback === 'function') callback(appWindow.contentWindow.window);
   } else {
-    chrome.app.window.create('chrome.html', {
+    chrome.app.window.create('index.html', {
       bounds: {
         width: width,
         height: height,
